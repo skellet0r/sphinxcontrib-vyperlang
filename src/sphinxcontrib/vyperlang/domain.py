@@ -1,5 +1,50 @@
+from sphinx.directives import ObjectDescription
 from sphinx.domains import Domain, ObjType
 from sphinx.locale import _
+
+
+class VyObject(ObjectDescription):
+    ...
+
+
+class VyContract(VyObject):
+    ...
+
+
+class VyInterface(VyObject):
+    ...
+
+
+class VyEvent(VyObject):
+    ...
+
+
+class VyEnum(VyObject):
+    ...
+
+
+class VyStruct(VyObject):
+    ...
+
+
+class VyMember(VyObject):
+    ...
+
+
+class VyConstant(VyObject):
+    ...
+
+
+class VyImmutable(VyObject):
+    ...
+
+
+class VyStateVar(VyObject):
+    ...
+
+
+class VyFunction(VyObject):
+    ...
 
 
 class VyperDomain(Domain):
@@ -18,4 +63,16 @@ class VyperDomain(Domain):
         "immutable": ObjType(_("immutable"), "immut", "obj"),
         "statevar": ObjType(_("state variable"), "svar", "obj"),
         "function": ObjType(_("function"), "func", "obj"),
+    }
+    directives = {
+        "contract": VyContract,
+        "interface": VyInterface,
+        "event": VyEvent,
+        "enum": VyEnum,
+        "struct": VyStruct,
+        "member": VyMember,
+        "constant": VyConstant,
+        "immutable": VyImmutable,
+        "statevar": VyStateVar,
+        "function": VyFunction,
     }
