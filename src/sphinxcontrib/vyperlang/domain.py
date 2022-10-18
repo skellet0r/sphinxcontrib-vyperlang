@@ -127,7 +127,7 @@ class VyperDomain(Domain):
     name = "vy"
     label = "Vyper"
     object_types = {
-        "contract": ObjType(_("contract"), "cont", "obj"),
+        "contract": ObjType(_("contract"), "contr", "obj"),
         "interface": ObjType(_("interface"), "iface", "obj"),
         "event": ObjType(_("event"), "event", "obj"),
         "enum": ObjType(_("enum"), "enum", "obj"),
