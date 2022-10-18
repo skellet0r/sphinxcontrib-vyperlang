@@ -3,17 +3,24 @@ from sphinx.directives import ObjectDescription
 from sphinx.domains import Domain, ObjType
 from sphinx.locale import _
 
-
-def mutability_validator(arg):
-    return directives.choice(arg, ("nonpayable", "payable", "pure", "view"))
-
-
-def visibility_validator(arg):
-    return directives.choice(arg, ("external", "internal", "public"))
+MUTABILITY = ("nonpayable", "payable", "pure", "view")
+VISIBILITY = ("external", "internal")
 
 
 class VyObject(ObjectDescription):
     ...
+
+
+class VyGlobal(VyObject):
+    option_spec = {
+        "type": directives.unchanged_required,
+        "public": directives.flag,
+        **VyObject.option_spec,
+    }
+
+
+class VyConstant(VyGlobal):
+    option_spec = {"value": directives.unchanged_required, **VyGlobal.option_spec}
 
 
 class VyContract(VyObject):
@@ -36,35 +43,10 @@ class VyStruct(VyObject):
     ...
 
 
-class VyConstant(VyObject):
-    option_spec = {
-        "type": directives.unchanged_required,
-        "value": directives.unchanged_required,
-        "visibility": visibility_validator,
-        **VyObject.option_spec,
-    }
-
-
-class VyImmutable(VyObject):
-    option_spec = {
-        "type": directives.unchanged_required,
-        "visibility": visibility_validator,
-        **VyObject.option_spec,
-    }
-
-
-class VyStateVar(VyObject):
-    option_spec = {
-        "type": directives.unchanged_required,
-        "visibility": visibility_validator,
-        **VyObject.option_spec,
-    }
-
-
 class VyFunction(VyObject):
     option_spec = {
-        "mutability": mutability_validator,
-        "visibility": visibility_validator,
+        "mutability": lambda arg: directives.choice(arg, MUTABILITY),
+        "visibility": lambda arg: directives.choice(arg, VISIBILITY),
         **VyObject.option_spec,
     }
 
@@ -80,9 +62,9 @@ class VyperDomain(Domain):
         "event": ObjType(_("event"), "event", "obj"),
         "enum": ObjType(_("enum"), "enum", "obj"),
         "struct": ObjType(_("struct"), "struct", "obj"),
-        "constant": ObjType(_("constant"), "const", "obj"),
         "immutable": ObjType(_("immutable"), "immut", "obj"),
         "statevar": ObjType(_("state variable"), "svar", "obj"),
+        "constant": ObjType(_("constant"), "const", "obj"),
         "function": ObjType(_("function"), "func", "obj"),
     }
     directives = {
@@ -91,8 +73,8 @@ class VyperDomain(Domain):
         "event": VyEvent,
         "enum": VyEnum,
         "struct": VyStruct,
+        "immutable": VyGlobal,
+        "statevar": VyGlobal,
         "constant": VyConstant,
-        "immutable": VyImmutable,
-        "statevar": VyStateVar,
         "function": VyFunction,
     }
