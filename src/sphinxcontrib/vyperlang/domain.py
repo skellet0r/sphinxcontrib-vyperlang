@@ -1,6 +1,7 @@
 import re
 
 from docutils.parsers.rst import directives
+from sphinx import addnodes
 from sphinx.directives import ObjectDescription
 from sphinx.domains import Domain, ObjType
 from sphinx.locale import _
@@ -23,6 +24,52 @@ VY_SIG_RE = re.compile(
 
 class VyObject(ObjectDescription):
     allow_nesting = False
+    needs_arglist = False
+
+    def get_signature_prefix(self):
+        return []
+
+    def handle_signature(self, sig, signode):
+        mo = VY_SIG_RE.match(sig)
+        if mo is None:
+            raise ValueError
+        name, arglist, retann = mo.groups()
+
+        cname = self.env.ref_context.get("vy:contract")
+        iname = self.env.ref_context.get("vy:interface", "")
+        if iname:
+            add_contract = False
+            fullname = iname + "." + name
+        else:
+            add_contract = True
+            fullname = name
+
+        signode["contract"] = cname
+        signode["interface"] = iname
+        signode["fullname"] = fullname
+
+        sig_prefix = self.get_signature_prefix()
+        if sig_prefix:
+            signode += addnodes.desc_annotation(str(sig_prefix), "", *sig_prefix)
+
+        if add_contract and self.env.config.add_contract_names:
+            nodetext = cname + "."
+            signode += addnodes.desc_addname(nodetext, nodetext)
+
+        signode += addnodes.desc_name(name, name)
+        if arglist:
+            # TODO: parse the parameter list
+            signode += addnodes.desc_parameterlist()
+        else:
+            if self.needs_arglist:
+                signode += addnodes.desc_parameterlist()
+
+        if retann:
+            # TODO: parse annotation
+            children = []
+            signode += addnodes.desc_returns(retann, "", *children)
+
+        return fullname
 
 
 class VyContractLike(VyObject):
