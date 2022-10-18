@@ -1,6 +1,15 @@
+from docutils.parsers.rst import directives
 from sphinx.directives import ObjectDescription
 from sphinx.domains import Domain, ObjType
 from sphinx.locale import _
+
+
+def mutability_validator(arg):
+    return directives.choice(arg, ("nonpayable", "payable", "pure", "view"))
+
+
+def visibility_validator(arg):
+    return directives.choice(arg, ("external", "internal", "public"))
 
 
 class VyObject(ObjectDescription):
@@ -32,19 +41,36 @@ class VyMember(VyObject):
 
 
 class VyConstant(VyObject):
-    ...
+    option_spec = {
+        "type": directives.unchanged_required,
+        "value": directives.unchanged_required,
+        "visibility": visibility_validator,
+        **VyObject.option_spec,
+    }
 
 
 class VyImmutable(VyObject):
-    ...
+    option_spec = {
+        "type": directives.unchanged_required,
+        "visibility": visibility_validator,
+        **VyObject.option_spec,
+    }
 
 
 class VyStateVar(VyObject):
-    ...
+    option_spec = {
+        "type": directives.unchanged_required,
+        "visibility": visibility_validator,
+        **VyObject.option_spec,
+    }
 
 
 class VyFunction(VyObject):
-    ...
+    option_spec = {
+        "mutability": mutability_validator,
+        "visibility": visibility_validator,
+        **VyObject.option_spec,
+    }
 
 
 class VyperDomain(Domain):
