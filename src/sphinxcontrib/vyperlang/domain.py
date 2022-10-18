@@ -24,14 +24,6 @@ class VyConstant(VyGlobal):
     option_spec = {"value": directives.unchanged_required, **VyGlobal.option_spec}
 
 
-class VyContract(VyObject):
-    ...
-
-
-class VyInterface(VyObject):
-    ...
-
-
 class VyEvent(VyObject):
     doc_field_types = [
         TypedField(
@@ -128,8 +120,8 @@ class VyperDomain(Domain):
         "function": ObjType(_("function"), "func", "obj"),
     }
     directives = {
-        "contract": VyContract,
-        "interface": VyInterface,
+        "contract": VyObject,
+        "interface": VyObject,
         "event": VyEvent,
         "enum": VyEnum,
         "struct": VyStruct,
