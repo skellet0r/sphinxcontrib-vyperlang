@@ -2,6 +2,7 @@ from docutils.parsers.rst import directives
 from sphinx.directives import ObjectDescription
 from sphinx.domains import Domain, ObjType
 from sphinx.locale import _
+from sphinx.util.docfields import Field, GroupedField, TypedField
 
 MUTABILITY = ("nonpayable", "payable", "pure", "view")
 VISIBILITY = ("external", "internal")
@@ -49,6 +50,35 @@ class VyFunction(VyObject):
         "visibility": lambda arg: directives.choice(arg, VISIBILITY),
         **VyObject.option_spec,
     }
+    doc_field_types = [
+        TypedField(
+            "parameter",
+            names=("parameter", "param", "argument", "arg"),
+            typenames=("type", "paramtype"),
+            label=_("Parameters"),
+            typerolename="obj",
+            can_collapse=True,
+        ),
+        GroupedField(
+            "revert",
+            names=("revert", "except", "raise"),
+            label=_("Reverts"),
+            can_collapse=True,
+        ),
+        Field(
+            "returnvalue",
+            names=("return", "returns"),
+            label=_("Returns"),
+            has_arg=False,
+        ),
+        Field(
+            "returntype",
+            names=("rtype",),
+            label=_("Return type"),
+            has_arg=False,
+            bodyrolename="obj",
+        ),
+    ]
 
 
 class VyperDomain(Domain):
