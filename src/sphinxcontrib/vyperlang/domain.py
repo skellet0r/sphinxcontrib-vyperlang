@@ -45,7 +45,16 @@ class VyEnum(VyObject):
 
 
 class VyStruct(VyObject):
-    ...
+    doc_field_types = [
+        TypedField(
+            "member",
+            names=("member",),
+            typenames=("type", "mtype"),
+            label=_("Members"),
+            typerolename="obj",
+            can_collapse=True,
+        )
+    ]
 
 
 class VyFunction(VyObject):
