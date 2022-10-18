@@ -33,7 +33,24 @@ class VyInterface(VyObject):
 
 
 class VyEvent(VyObject):
-    ...
+    doc_field_types = [
+        TypedField(
+            "topic",
+            names=("topic",),
+            typenames=("type", "ttype"),
+            label=_("Topics"),
+            typerolename="obj",
+            can_collapse=True,
+        ),
+        TypedField(
+            "data",
+            names=("data",),
+            typenames=("type", "dtype"),
+            label=_("Data"),
+            typerolename="obj",
+            can_collapse=True,
+        ),
+    ]
 
 
 class VyEnum(VyObject):
