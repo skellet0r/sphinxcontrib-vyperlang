@@ -9,7 +9,11 @@ VISIBILITY = ("external", "internal")
 
 
 class VyObject(ObjectDescription):
-    ...
+    allow_nesting = False
+
+
+class VyContractLike(VyObject):
+    allow_nesting = True
 
 
 class VyGlobalLike(VyObject):
@@ -120,8 +124,8 @@ class VyperDomain(Domain):
         "function": ObjType(_("function"), "func", "obj"),
     }
     directives = {
-        "contract": VyObject,
-        "interface": VyObject,
+        "contract": VyContractLike,
+        "interface": VyContractLike,
         "event": VyEvent,
         "enum": VyEnum,
         "struct": VyStruct,
