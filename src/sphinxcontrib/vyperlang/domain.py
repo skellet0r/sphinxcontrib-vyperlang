@@ -12,7 +12,8 @@ VISIBILITY = ("external", "internal")
 
 VY_SIG_RE = re.compile(
     r"""
-    ^(\w+)\s*                   # name
+    ^(?: (\w+)\. )?             # scope
+    (\w+)\s*                    # name
     (?:                         # optional:
         \(\s*(.*?)\s*\)         #   arguments
         (?:\s* -> \s* (.+))?    #   return annotation
