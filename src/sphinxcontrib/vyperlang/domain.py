@@ -34,16 +34,27 @@ class VyObject(ObjectDescription):
         mo = VY_SIG_RE.match(sig)
         if mo is None:
             raise ValueError
-        name, arglist, retann = mo.groups()
+        prefix, name, arglist, retann = mo.groups()
 
-        cname = self.env.ref_context.get("vy:contract")
+        cname = self.env.ref_context.get("vy:contract", "")
         iname = self.env.ref_context.get("vy:interface", "")
-        if iname:
+
+        if iname != "":
             add_contract = False
+            if prefix is not None:
+                # additional nesting under an interface is disallowed
+                # `IERC20.Bar.foo()` doesn't make sense
+                raise ValueError
+            elif arglist is None:
+                # signature is required to have an argument list
+                raise ValueError
             fullname = iname + "." + name
         else:
             add_contract = True
-            fullname = name
+            if prefix:
+                fullname = prefix + "." + name
+            else:
+                fullname = name
 
         signode["contract"] = cname
         signode["interface"] = iname
@@ -53,24 +64,26 @@ class VyObject(ObjectDescription):
         if sig_prefix:
             signode += addnodes.desc_annotation(str(sig_prefix), "", *sig_prefix)
 
-        if add_contract and self.env.config.add_contract_names:
+        if cname != "" and add_contract and self.env.config.add_contract_names:
             nodetext = cname + "."
             signode += addnodes.desc_addname(nodetext, nodetext)
 
         signode += addnodes.desc_name(name, name)
         if arglist:
             # TODO: parse the parameter list
-            signode += addnodes.desc_parameterlist()
+            signode += (
+                addnodes.desc_parameterlist()
+            )  # _parse_arglist(arglist, self.env)
         else:
             if self.needs_arglist:
                 signode += addnodes.desc_parameterlist()
 
         if retann:
             # TODO: parse annotation
-            children = []
+            children = []  # _parse_annotation(retann, self.env)
             signode += addnodes.desc_returns(retann, "", *children)
 
-        return fullname
+        return prefix, fullname
 
 
 class VyContractLike(VyObject):
