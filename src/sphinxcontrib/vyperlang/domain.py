@@ -1,3 +1,5 @@
+import re
+
 from docutils.parsers.rst import directives
 from sphinx.directives import ObjectDescription
 from sphinx.domains import Domain, ObjType
@@ -6,6 +8,18 @@ from sphinx.util.docfields import Field, GroupedField, TypedField
 
 MUTABILITY = ("nonpayable", "payable", "pure", "view")
 VISIBILITY = ("external", "internal")
+
+VY_SIG_RE = re.compile(
+    r"""
+    ^(\w*\.)?                   # prefix
+    (\w+)\s*                    # name
+    (?:                         # optional:
+        \(\s*(.*?)\s*\)         #   arguments
+        (?:\s* -> \s* (.+))?    #   return annotation
+    )?$
+    """,
+    re.VERBOSE,
+)
 
 
 class VyObject(ObjectDescription):
