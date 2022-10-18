@@ -36,10 +36,6 @@ class VyStruct(VyObject):
     ...
 
 
-class VyMember(VyObject):
-    ...
-
-
 class VyConstant(VyObject):
     option_spec = {
         "type": directives.unchanged_required,
@@ -84,7 +80,6 @@ class VyperDomain(Domain):
         "event": ObjType(_("event"), "event", "obj"),
         "enum": ObjType(_("enum"), "enum", "obj"),
         "struct": ObjType(_("struct"), "struct", "obj"),
-        "member": ObjType(_("member"), "memb", "obj"),
         "constant": ObjType(_("constant"), "const", "obj"),
         "immutable": ObjType(_("immutable"), "immut", "obj"),
         "statevar": ObjType(_("state variable"), "svar", "obj"),
@@ -96,7 +91,6 @@ class VyperDomain(Domain):
         "event": VyEvent,
         "enum": VyEnum,
         "struct": VyStruct,
-        "member": VyMember,
         "constant": VyConstant,
         "immutable": VyImmutable,
         "statevar": VyStateVar,
