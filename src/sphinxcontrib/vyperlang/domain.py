@@ -37,7 +37,11 @@ class VyEvent(VyObject):
 
 
 class VyEnum(VyObject):
-    ...
+    doc_field_types = [
+        GroupedField(
+            "element", names=("element", "elem"), label=_("Elements"), can_collapse=True
+        )
+    ]
 
 
 class VyStruct(VyObject):
