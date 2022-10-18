@@ -12,7 +12,7 @@ class VyObject(ObjectDescription):
     ...
 
 
-class VyGlobal(VyObject):
+class VyGlobalLike(VyObject):
     option_spec = {
         "type": directives.unchanged_required,
         "public": directives.flag,
@@ -20,8 +20,8 @@ class VyGlobal(VyObject):
     }
 
 
-class VyConstant(VyGlobal):
-    option_spec = {"value": directives.unchanged_required, **VyGlobal.option_spec}
+class VyConstant(VyGlobalLike):
+    option_spec = {"value": directives.unchanged_required, **VyGlobalLike.option_spec}
 
 
 class VyEvent(VyObject):
@@ -125,8 +125,8 @@ class VyperDomain(Domain):
         "event": VyEvent,
         "enum": VyEnum,
         "struct": VyStruct,
-        "immutable": VyGlobal,
-        "statevar": VyGlobal,
+        "immutable": VyGlobalLike,
+        "statevar": VyGlobalLike,
         "constant": VyConstant,
         "function": VyFunction,
     }
