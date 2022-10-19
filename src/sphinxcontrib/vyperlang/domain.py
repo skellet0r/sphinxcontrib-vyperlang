@@ -771,3 +771,19 @@ class VyperDomain(Domain):
         "constant": VyConstant,
         "function": VyFunction,
     }
+    roles = {
+        "contr": VyXRefRole(),
+        "iface": VyXRefRole(),
+        "event": VyXRefRole(),
+        "enum": VyXRefRole(),
+        "struct": VyXRefRole(),
+        "immut": VyXRefRole(),
+        "svar": VyXRefRole(),
+        "const": VyXRefRole(),
+        "func": VyXRefRole(fix_parens=True),
+        "obj": VyXRefRole(),
+    }
+    initial_data = {
+        "objects": {},  # fullname -> docname, objtype
+        "contracts": {},  # contract_name -> docname, synopsis, platform, deprecated
+    }
