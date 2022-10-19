@@ -334,6 +334,25 @@ class VyObject(ObjectDescription):
                     ("single", indextext, node_id, "", None)
                 )
 
+    def _toc_entry_name(self, sig_node):
+        if not sig_node.get("_toc_parts"):
+            return ""
+
+        config = self.env.app.config
+        objtype = sig_node.parent.get("objtype")
+        if config.add_function_parentheses and objtype == "function":
+            parens = "()"
+        else:
+            parens = ""
+        *parents, name = sig_node["_toc_parts"]
+        if config.toc_object_entries_show_parents == "domain":
+            return sig_node.get("fullname", name) + parens
+        if config.toc_object_entries_show_parents == "hide":
+            return name + parens
+        if config.toc_object_entries_show_parents == "all":
+            return ".".join(parents + [name + parens])
+        return ""
+
 
 class VyGlobalLike(VyObject):
     option_spec = {
