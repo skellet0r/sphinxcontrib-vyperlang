@@ -349,10 +349,6 @@ class VyEvent(VyObject):
     ]
 
 
-def foo() -> (int, str):
-    pass
-
-
 class VyEnum(VyObject):
     doc_field_types = [
         GroupedField(
