@@ -423,7 +423,7 @@ class VyObject(ObjectDescription):
         else:
             return tuple(fullname.split("."))
 
-    def get_index_text(self, modname, name):
+    def get_index_text(self, contract_name, name):
         raise NotImplementedError("Must be implemented in subclasses")
 
     def add_target_and_index(self, name_cls, sig, signode):
@@ -480,6 +480,36 @@ class VyGlobalLike(VyObject):
         "public": directives.flag,
         **VyObject.option_spec,
     }
+
+    @property
+    def signature_prefix(self):
+        if "public" in self.options:
+            return [addnodes.desc_sig_keyword("", "public"), addnodes.desc_sig_space()]
+        else:
+            return []
+
+    def handle_signature(self, sig, signode):
+        fullname, prefix = super().handle_signature(sig, signode)
+
+        typ = self.options.get("type")
+        if typ:
+            annotations = _parse_annotation(typ, self.env)
+            signode += addnodes.desc_annotation(
+                typ,
+                "",
+                addnodes.desc_sig_punctuation("", ":"),
+                addnodes.desc_sig_space(),
+                *annotations,
+            )
+
+        return fullname, prefix
+
+    def get_index_text(self, contract_name: str, name_cls: Tuple[str, str]) -> str:
+        name, cls = name_cls
+        if contract_name:
+            return _("%s (in contract %s)") % (name, contract_name)
+        else:
+            return _(f"%s (built-in {self.objtype})") % name
 
 
 class VyConstant(VyGlobalLike):
@@ -571,7 +601,7 @@ class VyFunction(VyObject):
             contract_name = self.env.ref_context.get("vy:contract", "")
             node_id = signode["ids"][0]
 
-            name, _ = name_cls
+            name, cls = name_cls
             if contract_name:
                 text = _("%s() (in contract %s)") % (name, contract_name)
                 self.indexnode["entries"].append(("single", text, node_id, "", None))
