@@ -1,7 +1,7 @@
 import ast
 import re
 from inspect import Parameter
-from typing import Any, List, NamedTuple, Optional, Tuple, Type
+from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Type
 
 from docutils import nodes
 from docutils.nodes import Element, Node
@@ -953,3 +953,20 @@ class VyperDomain(Domain):
         self.contracts[name] = ContractEntry(
             self.env.docname, node_id, synopsis, platform, deprecated
         )
+
+    def clear_doc(self, docname: str) -> None:
+        for fullname, obj in list(self.objects.items()):
+            if obj.docname == docname:
+                del self.objects[fullname]
+        for contract_name, contract in list(self.contracts.items()):
+            if contract.docname == docname:
+                del self.modules[contract_name]
+
+    def merge_domaindata(self, docnames: List[str], otherdata: Dict) -> None:
+        # XXX check duplicates?
+        for fullname, obj in otherdata["objects"].items():
+            if obj.docname in docnames:
+                self.objects[fullname] = obj
+        for contract_name, contract in otherdata["contracts"].items():
+            if contract.docname in docnames:
+                self.modules[contract_name] = contract
