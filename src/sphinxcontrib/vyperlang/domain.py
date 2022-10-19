@@ -1,7 +1,7 @@
 import ast
 import re
 from inspect import Parameter
-from typing import List, Optional, Tuple, Type
+from typing import Any, List, NamedTuple, Optional, Tuple, Type
 
 from docutils import nodes
 from docutils.nodes import Element, Node
@@ -12,13 +12,17 @@ from sphinx.addnodes import pending_xref
 from sphinx.directives import ObjectDescription
 from sphinx.domains import Domain, Index, IndexEntry, ObjType
 from sphinx.environment import BuildEnvironment
-from sphinx.locale import _
+from sphinx.locale import _, __
 from sphinx.roles import XRefRole
+from sphinx.util import logging
 from sphinx.util.docfields import Field, GroupedField, TypedField
 from sphinx.util.docutils import SphinxDirective, switch_source_input
 from sphinx.util.inspect import signature_from_str
 from sphinx.util.nodes import make_id, nested_parse_with_titles
 from sphinx.util.typing import TextlikeNode
+
+logger = logging.getLogger(__name__)
+
 
 MUTABILITY = ("nonpayable", "payable", "pure", "view")
 VISIBILITY = ("external", "internal")
@@ -34,6 +38,21 @@ VY_SIG_RE = re.compile(
     """,
     re.VERBOSE,
 )
+
+
+class ObjectEntry(NamedTuple):
+    docname: str
+    node_id: str
+    objtype: str
+    aliased: bool
+
+
+class ContractEntry(NamedTuple):
+    docname: str
+    node_id: str
+    synopsis: str
+    platform: str
+    deprecated: bool
 
 
 # copied from sphinx/domains/python.py with minor modifications
@@ -890,3 +909,47 @@ class VyperDomain(Domain):
         "contracts": {},  # contract_name -> docname, synopsis, platform, deprecated
     }
     indices = [VyperContractIndex]
+
+    @property
+    def objects(self):
+        return self.data.setdefault("objects", {})  # fullname -> ObjectEntry
+
+    @property
+    def contracts(self):
+        return self.data.setdefault("contracts", {})  # modname -> ContractEntry
+
+    def note_object(
+        self,
+        name: str,
+        objtype: str,
+        node_id: str,
+        aliased: bool = False,
+        location: Any = None,
+    ) -> None:
+        if name in self.objects:
+            other = self.objects[name]
+            if other.aliased and aliased is False:
+                # The original definition found. Override it!
+                pass
+            elif other.aliased is False and aliased:
+                # The original definition is already registered.
+                return
+            else:
+                # duplicated
+                logger.warning(
+                    __(
+                        "duplicate object description of %s, "
+                        "other instance in %s, use :noindex: for one of them"
+                    ),
+                    name,
+                    other.docname,
+                    location=location,
+                )
+        self.objects[name] = ObjectEntry(self.env.docname, node_id, objtype, aliased)
+
+    def note_contract(
+        self, name: str, node_id: str, synopsis: str, platform: str, deprecated: bool
+    ) -> None:
+        self.contracts[name] = ContractEntry(
+            self.env.docname, node_id, synopsis, platform, deprecated
+        )
