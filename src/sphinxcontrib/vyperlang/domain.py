@@ -383,6 +383,13 @@ class VyObject(ObjectDescription):
                 raise ValueError
             prefix = ""
             fullname = interface_name + "." + name
+
+            if self.objtype in ("statevar", "immutable"):
+                # these types shouldn't be defined in an interface
+                raise ValueError
+            elif contract_name and self.objtype in ("constant", "enum", "event"):
+                # these types shouldn't be defined inline either
+                raise ValueError
         else:
             fullname = prefix + "." + name if prefix else name
 
