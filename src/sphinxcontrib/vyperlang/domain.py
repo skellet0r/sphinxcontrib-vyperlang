@@ -4,7 +4,7 @@ from inspect import Parameter
 from typing import List, Optional, Tuple, Type
 
 from docutils import nodes
-from docutils.nodes import Node
+from docutils.nodes import Element, Node
 from docutils.parsers.rst import directives
 from docutils.parsers.rst.states import Inliner
 from sphinx import addnodes
@@ -13,6 +13,7 @@ from sphinx.directives import ObjectDescription
 from sphinx.domains import Domain, ObjType
 from sphinx.environment import BuildEnvironment
 from sphinx.locale import _
+from sphinx.roles import XRefRole
 from sphinx.util.docfields import Field, GroupedField, TypedField
 from sphinx.util.docutils import SphinxDirective, switch_source_input
 from sphinx.util.inspect import signature_from_str
@@ -711,6 +712,36 @@ class VyContract(SphinxDirective):
             ret.append(inode)
         ret.extend(content_node.children)
         return ret
+
+
+# copied from sphinx/domains/python.py with minor modifications
+class VyXRefRole(XRefRole):
+    def process_link(
+        self,
+        env: BuildEnvironment,
+        refnode: Element,
+        has_explicit_title: bool,
+        title: str,
+        target: str,
+    ) -> Tuple[str, str]:
+        refnode["vy:contract"] = env.ref_context.get("vy:contract")
+        refnode["vy:interface"] = env.ref_context.get("py:class")
+        if not has_explicit_title:
+            title = title.lstrip(".")  # only has a meaning for the target
+            target = target.lstrip("~")  # only has a meaning for the title
+            # if the first character is a tilde, don't display the module/class
+            # parts of the contents
+            if title[0:1] == "~":
+                title = title[1:]
+                dot = title.rfind(".")
+                if dot != -1:
+                    title = title[dot + 1 :]
+        # if the first character is a dot, search more specific namespaces first
+        # else search builtins first
+        if target[0:1] == ".":
+            target = target[1:]
+            refnode["refspecific"] = True
+        return title, target
 
 
 class VyperDomain(Domain):
