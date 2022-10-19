@@ -552,6 +552,11 @@ class VyEvent(VyObject):
         ),
     ]
 
+    def get_index_text(self, contract_name, name_cls):
+        if not contract_name:
+            return _("%s (built-in event)") % name_cls[0]
+        return _("%s (event in %s)") % (name_cls[0], contract_name)
+
 
 class VyEnum(VyObject):
     doc_field_types = [
@@ -559,6 +564,11 @@ class VyEnum(VyObject):
             "element", names=("element", "elem"), label=_("Elements"), can_collapse=True
         )
     ]
+
+    def get_index_text(self, contract_name, name_cls):
+        if not contract_name:
+            return _("%s (built-in enum)") % name_cls[0]
+        return _("%s (enum in %s)") % (name_cls[0], contract_name)
 
 
 class VyStruct(VyObject):
@@ -572,6 +582,11 @@ class VyStruct(VyObject):
             can_collapse=True,
         )
     ]
+
+    def get_index_text(self, contract_name, name_cls):
+        if not contract_name:
+            return _("%s (built-in struct)") % name_cls[0]
+        return _("%s (struct in %s)") % (name_cls[0], contract_name)
 
 
 class VyFunction(VyObject):
