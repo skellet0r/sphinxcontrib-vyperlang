@@ -24,7 +24,6 @@ VY_SIG_RE = re.compile(
 
 
 class VyObject(ObjectDescription):
-    allow_nesting = False
     needs_arglist = False
 
     def get_signature_prefix(self):
@@ -84,10 +83,6 @@ class VyObject(ObjectDescription):
             signode += addnodes.desc_returns(retann, "", *children)
 
         return prefix, fullname
-
-
-class VyContractLike(VyObject):
-    allow_nesting = True
 
 
 class VyGlobalLike(VyObject):
@@ -198,8 +193,8 @@ class VyperDomain(Domain):
         "function": ObjType(_("function"), "func", "obj"),
     }
     directives = {
-        "contract": VyContractLike,
-        "interface": VyContractLike,
+        "contract": VyObject,
+        "interface": VyObject,
         "event": VyEvent,
         "enum": VyEnum,
         "struct": VyStruct,
