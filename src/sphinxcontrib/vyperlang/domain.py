@@ -1,11 +1,12 @@
 import ast
 import re
 from inspect import Parameter
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Type
 
 from docutils import nodes
 from docutils.nodes import Node
 from docutils.parsers.rst import directives
+from docutils.parsers.rst.states import Inliner
 from sphinx import addnodes
 from sphinx.addnodes import pending_xref
 from sphinx.directives import ObjectDescription
@@ -15,6 +16,7 @@ from sphinx.locale import _
 from sphinx.util.docfields import Field, GroupedField, TypedField
 from sphinx.util.inspect import signature_from_str
 from sphinx.util.nodes import make_id
+from sphinx.util.typing import TextlikeNode
 
 MUTABILITY = ("nonpayable", "payable", "pure", "view")
 VISIBILITY = ("external", "internal")
@@ -248,6 +250,100 @@ def _parse_arglist(
         params += addnodes.desc_parameter("", "", addnodes.desc_sig_operator("", "/"))
 
     return params
+
+
+# copied from sphinx/domains/python.py with minor modifications
+class VyXrefMixin:
+    def make_xref(
+        self,
+        rolename: str,
+        domain: str,
+        target: str,
+        innernode: Type[TextlikeNode] = nodes.emphasis,
+        contnode: Node = None,
+        env: BuildEnvironment = None,
+        inliner: Inliner = None,
+        location: Node = None,
+    ) -> Node:
+        # we use inliner=None to make sure we get the old behaviour with a single
+        # pending_xref node
+        result = super().make_xref(
+            rolename,
+            domain,
+            target,  # type: ignore
+            innernode,
+            contnode,
+            env,
+            inliner=None,
+            location=None,
+        )
+        if isinstance(result, pending_xref):
+            result["refspecific"] = True
+            result["vy:contract"] = env.ref_context.get("vy:contract")
+            result["vy:interface"] = env.ref_context.get("vy:interface")
+
+            reftype, reftarget, reftitle, _ = parse_reftarget(target)
+            if reftarget != reftitle:
+                result["reftype"] = reftype
+                result["reftarget"] = reftarget
+
+                result.clear()
+                result += innernode(reftitle, reftitle)
+
+        return result
+
+    def make_xrefs(
+        self,
+        rolename: str,
+        domain: str,
+        target: str,
+        innernode: Type[TextlikeNode] = nodes.emphasis,
+        contnode: Node = None,
+        env: BuildEnvironment = None,
+        inliner: Inliner = None,
+        location: Node = None,
+    ) -> List[Node]:
+        delims = r"(\s*[\[\]\(\),](?:\s*o[rf]\s)?\s*|\s+o[rf]\s+|\s*\|\s*|\.\.\.)"
+        delims_re = re.compile(delims)
+        sub_targets = re.split(delims, target)
+
+        split_contnode = bool(contnode and contnode.astext() == target)
+
+        in_literal = False
+        results = []
+        for sub_target in filter(None, sub_targets):
+            if split_contnode:
+                contnode = nodes.Text(sub_target)
+
+            if in_literal or delims_re.match(sub_target):
+                results.append(contnode or innernode(sub_target, sub_target))
+            else:
+                results.append(
+                    self.make_xref(
+                        rolename,
+                        domain,
+                        sub_target,
+                        innernode,
+                        contnode,
+                        env,
+                        inliner,
+                        location,
+                    )
+                )
+
+        return results
+
+
+class VyField(VyXrefMixin, Field):
+    pass
+
+
+class VyGroupedField(VyXrefMixin, GroupedField):
+    pass
+
+
+class VyTypedField(VyXrefMixin, TypedField):
+    pass
 
 
 class VyObject(ObjectDescription):
