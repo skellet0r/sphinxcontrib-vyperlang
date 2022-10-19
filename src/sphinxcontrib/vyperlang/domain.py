@@ -1,5 +1,6 @@
 import ast
 import re
+from inspect import Parameter
 from typing import List, Optional, Tuple
 
 from docutils import nodes
@@ -12,6 +13,7 @@ from sphinx.domains import Domain, ObjType
 from sphinx.environment import BuildEnvironment
 from sphinx.locale import _
 from sphinx.util.docfields import Field, GroupedField, TypedField
+from sphinx.util.inspect import signature_from_str
 
 MUTABILITY = ("nonpayable", "payable", "pure", "view")
 VISIBILITY = ("external", "internal")
@@ -185,6 +187,66 @@ def _parse_annotation(annotation: str, env: BuildEnvironment) -> List[Node]:
         return result
     except SyntaxError:
         return [type_to_xref(annotation, env)]
+
+
+# copied from sphinx/domains/python.py with minor modifications
+def _parse_arglist(
+    arglist: str, env: Optional[BuildEnvironment] = None
+) -> addnodes.desc_parameterlist:
+    """Parse a list of arguments using AST parser"""
+    params = addnodes.desc_parameterlist(arglist)
+    sig = signature_from_str("(%s)" % arglist)
+    last_kind = None
+    for param in sig.parameters.values():
+        if param.kind != param.POSITIONAL_ONLY and last_kind == param.POSITIONAL_ONLY:
+            # PEP-570: Separator for Positional Only Parameter: /
+            params += addnodes.desc_parameter(
+                "", "", addnodes.desc_sig_operator("", "/")
+            )
+        if param.kind == param.KEYWORD_ONLY and last_kind in (
+            param.POSITIONAL_OR_KEYWORD,
+            param.POSITIONAL_ONLY,
+            None,
+        ):
+            # PEP-3102: Separator for Keyword Only Parameter: *
+            params += addnodes.desc_parameter(
+                "", "", addnodes.desc_sig_operator("", "*")
+            )
+
+        node = addnodes.desc_parameter()
+        if param.kind == param.VAR_POSITIONAL:
+            node += addnodes.desc_sig_operator("", "*")
+            node += addnodes.desc_sig_name("", param.name)
+        elif param.kind == param.VAR_KEYWORD:
+            node += addnodes.desc_sig_operator("", "**")
+            node += addnodes.desc_sig_name("", param.name)
+        else:
+            node += addnodes.desc_sig_name("", param.name)
+
+        if param.annotation is not param.empty:
+            children = _parse_annotation(param.annotation, env)
+            node += addnodes.desc_sig_punctuation("", ":")
+            node += addnodes.desc_sig_space()
+            node += addnodes.desc_sig_name("", "", *children)  # type: ignore
+        if param.default is not param.empty:
+            if param.annotation is not param.empty:
+                node += addnodes.desc_sig_space()
+                node += addnodes.desc_sig_operator("", "=")
+                node += addnodes.desc_sig_space()
+            else:
+                node += addnodes.desc_sig_operator("", "=")
+            node += nodes.inline(
+                "", param.default, classes=["default_value"], support_smartquotes=False
+            )
+
+        params += node
+        last_kind = param.kind
+
+    if last_kind == Parameter.POSITIONAL_ONLY:
+        # PEP-570: Separator for Positional Only Parameter: /
+        params += addnodes.desc_parameter("", "", addnodes.desc_sig_operator("", "/"))
+
+    return params
 
 
 class VyObject(ObjectDescription):
