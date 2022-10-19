@@ -14,8 +14,9 @@ from sphinx.domains import Domain, ObjType
 from sphinx.environment import BuildEnvironment
 from sphinx.locale import _
 from sphinx.util.docfields import Field, GroupedField, TypedField
+from sphinx.util.docutils import SphinxDirective, switch_source_input
 from sphinx.util.inspect import signature_from_str
-from sphinx.util.nodes import make_id
+from sphinx.util.nodes import make_id, nested_parse_with_titles
 from sphinx.util.typing import TextlikeNode
 
 MUTABILITY = ("nonpayable", "payable", "pure", "view")
@@ -659,6 +660,59 @@ class VyFunction(VyObject):
         return None
 
 
+class VyContract(SphinxDirective):
+    has_content = True
+    required_arguments = 1
+    optional_arguments = 0
+    final_argument_whitespace = False
+    option_spec = {
+        "platform": lambda x: x,
+        "synopsis": lambda x: x,
+        "noindex": directives.flag,
+        "nocontentsentry": directives.flag,
+        "deprecated": directives.flag,
+    }
+
+    def run(self):
+        domain = self.env.get_domain("vy")
+
+        contract_name = self.arguments[0].strip()
+        noindex = "noindex" in self.options
+        self.env.ref_context["vy:contract"] = contract_name
+
+        content_node = nodes.section()
+        with switch_source_input(self.state, self.content):
+            # necessary so that the child nodes get the right source/line set
+            content_node.document = self.state.document
+            nested_parse_with_titles(self.state, self.content, content_node)
+
+        ret = []
+        if not noindex:
+            # note contract to the domain
+            node_id = make_id(self.env, self.state.document, "contract", contract_name)
+            target = nodes.target("", "", ids=[node_id], ismod=True)
+            self.set_source_info(target)
+            self.state.document.note_explicit_target(target)
+
+            domain.note_contract(
+                contract_name,
+                node_id,
+                self.options.get("synopsis", ""),
+                self.options.get("platform", ""),
+                "deprecated" in self.options,
+            )
+            domain.note_object(contract_name, "contract", node_id, location=target)
+
+            # the platform and synopsis aren't printed; in fact, they are only
+            # used in the modindex currently
+            ret.append(target)
+            indextext = "%s; %s" % (_("contract"), contract_name)
+            inode = addnodes.index(entries=[("pair", indextext, node_id, "", None)])
+            ret.append(inode)
+        ret.extend(content_node.children)
+        return ret
+
+
 class VyperDomain(Domain):
     """Vyper language domain."""
 
@@ -676,7 +730,7 @@ class VyperDomain(Domain):
         "function": ObjType(_("function"), "func", "obj"),
     }
     directives = {
-        "contract": VyObject,
+        "contract": VyContract,
         "interface": VyInterface,
         "event": VyEvent,
         "enum": VyEnum,
