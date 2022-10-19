@@ -539,6 +539,13 @@ class VyConstant(VyGlobalLike):
         return fullname, prefix
 
 
+class VyInterface(VyObject):
+    def get_index_text(self, contract_name, name_cls):
+        if not contract_name:
+            return _("%s (built-in interface)") % name_cls[0]
+        return _("%s (interface in %s)") % (name_cls[0], contract_name)
+
+
 class VyEvent(VyObject):
     doc_field_types = [
         VyTypedField(
@@ -670,7 +677,7 @@ class VyperDomain(Domain):
     }
     directives = {
         "contract": VyObject,
-        "interface": VyObject,
+        "interface": VyInterface,
         "event": VyEvent,
         "enum": VyEnum,
         "struct": VyStruct,
