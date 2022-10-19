@@ -1,7 +1,7 @@
 import ast
 import re
 from inspect import Parameter
-from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Type
+from typing import Any, Dict, Iterator, List, NamedTuple, Optional, Tuple, Type
 
 from docutils import nodes
 from docutils.nodes import Element, Node
@@ -9,6 +9,7 @@ from docutils.parsers.rst import directives
 from docutils.parsers.rst.states import Inliner
 from sphinx import addnodes
 from sphinx.addnodes import pending_xref
+from sphinx.builders import Builder
 from sphinx.directives import ObjectDescription
 from sphinx.domains import Domain, Index, IndexEntry, ObjType
 from sphinx.environment import BuildEnvironment
@@ -18,7 +19,12 @@ from sphinx.util import logging
 from sphinx.util.docfields import Field, GroupedField, TypedField
 from sphinx.util.docutils import SphinxDirective, switch_source_input
 from sphinx.util.inspect import signature_from_str
-from sphinx.util.nodes import make_id, nested_parse_with_titles
+from sphinx.util.nodes import (
+    find_pending_xref_condition,
+    make_id,
+    make_refnode,
+    nested_parse_with_titles,
+)
 from sphinx.util.typing import TextlikeNode
 
 logger = logging.getLogger(__name__)
@@ -1046,3 +1052,144 @@ class VyperDomain(Domain):
         if newname is not None:
             matches.append((newname, self.objects[newname]))
         return matches
+
+    def resolve_xref(
+        self,
+        env: BuildEnvironment,
+        fromdocname: str,
+        builder: Builder,
+        type: str,
+        target: str,
+        node: pending_xref,
+        contnode: Element,
+    ) -> Optional[Element]:
+        contract_name = node.get("vy:contract")
+        interface_name = node.get("vy:interface")
+        searchmode = 1 if node.hasattr("refspecific") else 0
+        matches = self.find_obj(
+            env, contract_name, interface_name, target, type, searchmode
+        )
+
+        if not matches:
+            return None
+        elif len(matches) > 1:
+            canonicals = [m for m in matches if not m[1].aliased]
+            if len(canonicals) == 1:
+                matches = canonicals
+            else:
+                logger.warning(
+                    __("more than one target found for cross-reference %r: %s"),
+                    target,
+                    ", ".join(match[0] for match in matches),
+                    type="ref",
+                    subtype="vyper",
+                    location=node,
+                )
+        name, obj = matches[0]
+
+        if obj[2] == "contract":
+            return self._make_module_refnode(builder, fromdocname, name, contnode)
+        else:
+            # determine the content of the reference by conditions
+            content = find_pending_xref_condition(node, "resolved")
+            if content:
+                children = content.children
+            else:
+                # if not found, use contnode
+                children = [contnode]
+
+            return make_refnode(builder, fromdocname, obj[0], obj[1], children, name)
+
+    def resolve_any_xref(
+        self,
+        env: BuildEnvironment,
+        fromdocname: str,
+        builder: Builder,
+        target: str,
+        node: pending_xref,
+        contnode: Element,
+    ) -> List[Tuple[str, Element]]:
+        contract_name = node.get("vy:contract")
+        interface_name = node.get("vy:interface")
+        results: List[Tuple[str, Element]] = []
+
+        # always search in "refspecific" mode with the :any: role
+        matches = self.find_obj(env, contract_name, interface_name, target, None, 1)
+        multiple_matches = len(matches) > 1
+
+        for name, obj in matches:
+
+            if multiple_matches and obj.aliased:
+                # Skip duplicated matches
+                continue
+
+            if obj[2] == "contract":
+                results.append(
+                    (
+                        "vy:contr",
+                        self._make_contract_refnode(
+                            builder, fromdocname, name, contnode
+                        ),
+                    )
+                )
+            else:
+                # determine the content of the reference by conditions
+                content = find_pending_xref_condition(node, "resolved")
+                if content:
+                    children = content.children
+                else:
+                    # if not found, use contnode
+                    children = [contnode]
+
+                results.append(
+                    (
+                        "vy:" + self.role_for_objtype(obj[2]),
+                        make_refnode(
+                            builder, fromdocname, obj[0], obj[1], children, name
+                        ),
+                    )
+                )
+        return results
+
+    def _make_contract_refnode(
+        self, builder: Builder, fromdocname: str, name: str, contnode: Node
+    ) -> Element:
+        # get additional info for modules
+        contract = self.contracts[name]
+        title = name
+        if contract.synopsis:
+            title += ": " + contract.synopsis
+        if contract.deprecated:
+            title += _(" (deprecated)")
+        if contract.platform:
+            title += " (" + contract.platform + ")"
+        return make_refnode(
+            builder, fromdocname, contract.docname, contract.node_id, contnode, title
+        )
+
+    def get_objects(self) -> Iterator[Tuple[str, str, str, str, str, int]]:
+        for contract_name, contract in self.contracts.items():
+            yield (
+                contract_name,
+                contract_name,
+                "contract",
+                contract.docname,
+                contract.node_id,
+                0,
+            )
+        for refname, obj in self.objects.items():
+            if obj.objtype != "contract":  # contracts are already handled
+                if obj.aliased:
+                    # aliased names are not full-text searchable.
+                    yield (refname, refname, obj.objtype, obj.docname, obj.node_id, -1)
+                else:
+                    yield (refname, refname, obj.objtype, obj.docname, obj.node_id, 1)
+
+    def get_full_qualified_name(self, node: Element) -> Optional[str]:
+        contract_name = node.get("vy:contract")
+        interface_name = node.get("vy:interface")
+        target = node.get("reftarget")
+        if target is None:
+            return None
+        else:
+            return ".".join(filter(None, [contract_name, interface_name, target]))
