@@ -312,6 +312,9 @@ class VyObject(ObjectDescription):
         else:
             return tuple(fullname.split("."))
 
+    def get_index_text(self, modname, name):
+        raise NotImplementedError("Must be implemented in subclasses")
+
 
 class VyGlobalLike(VyObject):
     option_spec = {
