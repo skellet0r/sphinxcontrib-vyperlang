@@ -140,6 +140,7 @@ class VyStruct(VyObject):
 
 
 class VyFunction(VyObject):
+    needs_arglist = True
     option_spec = {
         "mutability": lambda arg: directives.choice(arg, MUTABILITY),
         "visibility": lambda arg: directives.choice(arg, VISIBILITY),
