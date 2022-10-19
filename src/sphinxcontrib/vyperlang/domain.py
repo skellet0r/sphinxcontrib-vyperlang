@@ -10,7 +10,7 @@ from docutils.parsers.rst.states import Inliner
 from sphinx import addnodes
 from sphinx.addnodes import pending_xref
 from sphinx.directives import ObjectDescription
-from sphinx.domains import Domain, ObjType
+from sphinx.domains import Domain, Index, IndexEntry, ObjType
 from sphinx.environment import BuildEnvironment
 from sphinx.locale import _
 from sphinx.roles import XRefRole
@@ -760,6 +760,92 @@ def filter_meta_fields(app, domain, objtype, content):
                     node.remove(field)
 
 
+class VyperContractIndex(Index):
+    name = "contractindex"
+    localname = _("Vyper Contract Index")
+    shortname = _("contracts")
+
+    def generate(self, docnames=None):
+        content = {}
+        # list of prefixes to ignore
+        ignores = self.domain.env.config["contractindex_common_prefix"]
+        ignores = sorted(ignores, key=len, reverse=True)
+        # list of all contracts, sorted by module name
+        contracts = sorted(
+            self.domain.data["contracts"].items(), key=lambda x: x[0].lower()
+        )
+        # sort out collapsible contracts
+        prev_contract_name = ""
+        num_toplevels = 0
+        for contract_name, (
+            docname,
+            node_id,
+            synopsis,
+            platforms,
+            deprecated,
+        ) in contracts:
+            if docnames and docname not in docnames:
+                continue
+
+            for ignore in ignores:
+                if contract_name.startswith(ignore):
+                    contract_name = contract_name[len(ignore) :]
+                    stripped = ignore
+                    break
+            else:
+                stripped = ""
+
+            # we stripped the whole contract name?
+            if not contract_name:
+                contract_name, stripped = stripped, ""
+
+            entries = content.setdefault(contract_name[0].lower(), [])
+
+            package = contract_name.split(".")[0]
+            if package != contract_name:
+                # it's a submodule
+                if prev_contract_name == package:
+                    # first submodule - make parent a group head
+                    if entries:
+                        last = entries[-1]
+                        entries[-1] = IndexEntry(
+                            last[0], 1, last[2], last[3], last[4], last[5], last[6]
+                        )
+                elif not prev_contract_name.startswith(package):
+                    # submodule without parent in list, add dummy entry
+                    entries.append(
+                        IndexEntry(stripped + package, 1, "", "", "", "", "")
+                    )
+                subtype = 2
+            else:
+                num_toplevels += 1
+                subtype = 0
+
+            qualifier = _("Deprecated") if deprecated else ""
+            entries.append(
+                IndexEntry(
+                    stripped + contract_name,
+                    subtype,
+                    docname,
+                    node_id,
+                    platforms,
+                    qualifier,
+                    synopsis,
+                )
+            )
+            prev_contract_name = contract_name
+
+        # apply heuristics when to collapse modindex at page load:
+        # only collapse if number of toplevel contracts is larger than
+        # number of subcontracts
+        collapse = len(contracts) - num_toplevels < num_toplevels
+
+        # sort by first letter
+        sorted_content = sorted(content.items())
+
+        return sorted_content, collapse
+
+
 class VyperDomain(Domain):
     """Vyper language domain."""
 
@@ -803,3 +889,4 @@ class VyperDomain(Domain):
         "objects": {},  # fullname -> docname, objtype
         "contracts": {},  # contract_name -> docname, synopsis, platform, deprecated
     }
+    indices = [VyperContractIndex]
