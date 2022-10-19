@@ -25,6 +25,10 @@ VY_SIG_RE = re.compile(
 class VyObject(ObjectDescription):
     needs_arglist = False
 
+    @property
+    def signature_prefix(self):
+        return []
+
 
 class VyGlobalLike(VyObject):
     option_spec = {
