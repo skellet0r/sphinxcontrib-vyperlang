@@ -1,7 +1,6 @@
 import re
 
 from docutils.parsers.rst import directives
-from sphinx import addnodes
 from sphinx.directives import ObjectDescription
 from sphinx.domains import Domain, ObjType
 from sphinx.locale import _
@@ -25,64 +24,6 @@ VY_SIG_RE = re.compile(
 
 class VyObject(ObjectDescription):
     needs_arglist = False
-
-    def get_signature_prefix(self):
-        return []
-
-    def handle_signature(self, sig, signode):
-        mo = VY_SIG_RE.match(sig)
-        if mo is None:
-            raise ValueError
-        prefix, name, arglist, retann = mo.groups()
-
-        cname = self.env.ref_context.get("vy:contract", "")
-        iname = self.env.ref_context.get("vy:interface", "")
-
-        if iname != "":
-            add_contract = False
-            if prefix is not None:
-                # additional nesting under an interface is disallowed
-                # `IERC20.Bar.foo()` doesn't make sense
-                raise ValueError
-            elif arglist is None:
-                # signature is required to have an argument list
-                raise ValueError
-            fullname = iname + "." + name
-        else:
-            add_contract = True
-            if prefix:
-                fullname = prefix + "." + name
-            else:
-                fullname = name
-
-        signode["contract"] = cname
-        signode["interface"] = iname
-        signode["fullname"] = fullname
-
-        sig_prefix = self.get_signature_prefix()
-        if sig_prefix:
-            signode += addnodes.desc_annotation(str(sig_prefix), "", *sig_prefix)
-
-        if cname != "" and add_contract and self.env.config.add_contract_names:
-            nodetext = cname + "."
-            signode += addnodes.desc_addname(nodetext, nodetext)
-
-        signode += addnodes.desc_name(name, name)
-        if arglist:
-            # TODO: parse the parameter list
-            signode += (
-                addnodes.desc_parameterlist()
-            )  # _parse_arglist(arglist, self.env)
-        else:
-            if self.needs_arglist:
-                signode += addnodes.desc_parameterlist()
-
-        if retann:
-            # TODO: parse annotation
-            children = []  # _parse_annotation(retann, self.env)
-            signode += addnodes.desc_returns(retann, "", *children)
-
-        return prefix, fullname
 
 
 class VyGlobalLike(VyObject):
