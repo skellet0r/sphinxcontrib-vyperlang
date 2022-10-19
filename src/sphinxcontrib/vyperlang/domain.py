@@ -1,6 +1,7 @@
 import re
 
 from docutils.parsers.rst import directives
+from sphinx import addnodes
 from sphinx.directives import ObjectDescription
 from sphinx.domains import Domain, ObjType
 from sphinx.locale import _
@@ -28,6 +29,53 @@ class VyObject(ObjectDescription):
     @property
     def signature_prefix(self):
         return []
+
+    def handle_signature(self, sig, signode):
+        mo = VY_SIG_RE.match(sig)
+        if mo is None:
+            raise ValueError
+        prefix, name, arglist, retann = mo.groups(default="")
+
+        # determine the contract, interface (if applicable), and full name
+        contract_name = self.env.ref_context.get("vy:contract", "")
+        interface_name = self.env.ref_context.get("vy:interface", "")
+
+        add_contract = False if interface_name else True
+        if interface_name:
+            if prefix and prefix != interface_name:
+                raise ValueError
+            prefix = ""
+            fullname = interface_name + "." + name
+        else:
+            fullname = prefix + "." + name if prefix else name
+
+        signode["contract"] = contract_name
+        signode["interface"] = interface_name
+        signode["fullname"] = fullname
+
+        sig_prefix = self.signature_prefix
+        if sig_prefix:
+            signode += addnodes.desc_annotation(str(sig_prefix), "", *sig_prefix)
+
+        if prefix:
+            signode += addnodes.desc_addname(prefix, prefix)
+        elif contract_name and add_contract and self.env.config.add_contract_names:
+            nodetext = contract_name + "."
+            signode += addnodes.desc_addname(nodetext, nodetext)
+
+        signode += addnodes.desc_name(name, name)
+        if arglist:
+            # signode += _parse_arglist(arglist, self.env)
+            pass
+        elif self.needs_arglist:
+            signode += addnodes.desc_parameterlist()
+
+        if retann:
+            # children = _parse_annotation(retann, self.env)
+            # signode += addnodes.desc_returns(retann, '', *children)
+            pass
+
+        return prefix, fullname
 
 
 class VyGlobalLike(VyObject):
