@@ -970,3 +970,79 @@ class VyperDomain(Domain):
         for contract_name, contract in otherdata["contracts"].items():
             if contract.docname in docnames:
                 self.modules[contract_name] = contract
+
+    def find_obj(
+        self,
+        env: BuildEnvironment,
+        contract_name: str,
+        interface_name: str,
+        name: str,
+        type: str,
+        searchmode: int = 0,
+    ) -> List[Tuple[str, ObjectEntry]]:
+        """Find a Vyper object for "name", perhaps using the given contract
+        and/or interface name.  Returns a list of (name, object entry) tuples.
+        """
+        # skip parens
+        if name[-2:] == "()":
+            name = name[:-2]
+
+        if not name:
+            return []
+
+        matches: List[Tuple[str, ObjectEntry]] = []
+
+        newname = None
+        if searchmode == 1:
+            if type is None:
+                objtypes = list(self.object_types)
+            else:
+                objtypes = self.objtypes_for_role(type)
+            if objtypes is not None:
+                if contract_name and interface_name:
+                    fullname = contract_name + "." + interface_name + "." + name
+                    if (
+                        fullname in self.objects
+                        and self.objects[fullname].objtype in objtypes
+                    ):
+                        newname = fullname
+                if not newname:
+                    if (
+                        contract_name
+                        and contract_name + "." + name in self.objects
+                        and self.objects[contract_name + "." + name].objtype in objtypes
+                    ):
+                        newname = contract_name + "." + name
+                    elif (
+                        name in self.objects and self.objects[name].objtype in objtypes
+                    ):
+                        newname = name
+                    else:
+                        # "fuzzy" searching mode
+                        searchname = "." + name
+                        matches = [
+                            (oname, self.objects[oname])
+                            for oname in self.objects
+                            if oname.endswith(searchname)
+                            and self.objects[oname].objtype in objtypes
+                        ]
+        else:
+            # NOTE: searching for exact match, object type is not considered
+            if name in self.objects:
+                newname = name
+            elif type == "contr":
+                # only exact matches allowed for contracts
+                return []
+            elif interface_name and interface_name + "." + name in self.objects:
+                newname = interface_name + "." + name
+            elif contract_name and contract_name + "." + name in self.objects:
+                newname = contract_name + "." + name
+            elif (
+                contract_name
+                and interface_name
+                and contract_name + "." + interface_name + "." + name in self.objects
+            ):
+                newname = contract_name + "." + interface_name + "." + name
+        if newname is not None:
+            matches.append((newname, self.objects[newname]))
+        return matches
