@@ -488,7 +488,7 @@ class VyConstant(VyGlobalLike):
 
 class VyEvent(VyObject):
     doc_field_types = [
-        TypedField(
+        VyTypedField(
             "topic",
             names=("topic",),
             typenames=("type", "ttype"),
@@ -496,7 +496,7 @@ class VyEvent(VyObject):
             typerolename="obj",
             can_collapse=True,
         ),
-        TypedField(
+        VyTypedField(
             "data",
             names=("data",),
             typenames=("type", "dtype"),
@@ -509,7 +509,7 @@ class VyEvent(VyObject):
 
 class VyEnum(VyObject):
     doc_field_types = [
-        GroupedField(
+        VyGroupedField(
             "element", names=("element", "elem"), label=_("Elements"), can_collapse=True
         )
     ]
@@ -517,7 +517,7 @@ class VyEnum(VyObject):
 
 class VyStruct(VyObject):
     doc_field_types = [
-        TypedField(
+        VyTypedField(
             "member",
             names=("member",),
             typenames=("type", "mtype"),
@@ -536,7 +536,7 @@ class VyFunction(VyObject):
         **VyObject.option_spec,
     }
     doc_field_types = [
-        TypedField(
+        VyTypedField(
             "parameter",
             names=("parameter", "param", "argument", "arg"),
             typenames=("type", "paramtype"),
@@ -544,19 +544,19 @@ class VyFunction(VyObject):
             typerolename="obj",
             can_collapse=True,
         ),
-        GroupedField(
+        VyGroupedField(
             "revert",
             names=("revert", "except", "raise"),
             label=_("Reverts"),
             can_collapse=True,
         ),
-        Field(
+        VyField(
             "returnvalue",
             names=("return", "returns"),
             label=_("Returns"),
             has_arg=False,
         ),
-        Field(
+        VyField(
             "returntype",
             names=("rtype",),
             label=_("Return type"),
