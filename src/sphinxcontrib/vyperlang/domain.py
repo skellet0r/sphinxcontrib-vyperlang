@@ -74,7 +74,7 @@ def type_to_xref(
         reftype=reftype,
         reftarget=target,
         refspecific=refspecific,
-        **kwargs
+        **kwargs,
     )
 
 
@@ -267,6 +267,20 @@ class VyObject(ObjectDescription):
         contract_name = self.env.ref_context.get("vy:contract", "")
         interface_name = self.env.ref_context.get("vy:interface", "")
 
+        objtype = self.objtype
+        if objtype in ("contract", "interface"):
+            # contracts and interfaces should only have a name
+            is_valid_sig = name and not (prefix or arglist or retann)
+            # interfaces can't be under interfaces
+            # contracts can't be under contracts / interfaces
+            is_valid_nesting = (
+                not (contract_name or interface_name)
+                if objtype == "contract"
+                else not interface_name
+            )
+            if not (is_valid_sig or is_valid_nesting):
+                raise ValueError
+
         add_contract = False if interface_name else True
         if interface_name:
             if prefix and prefix != interface_name:
@@ -333,6 +347,16 @@ class VyObject(ObjectDescription):
                 self.indexnode["entries"].append(
                     ("single", indextext, node_id, "", None)
                 )
+
+    def before_content(self):
+        if self.names:
+            fullname, _ = self.names[-1]
+            if self.objtype in ("contract", "interface"):
+                self.env.ref_context[f"vy:{self.objtype}"] = fullname
+
+    def after_content(self) -> None:
+        if self.objtype in ("contract", "interface"):
+            self.env.ref_context[f"vy:{self.objtype}"] = ""
 
     def _toc_entry_name(self, sig_node):
         if not sig_node.get("_toc_parts"):
