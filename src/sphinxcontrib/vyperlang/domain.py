@@ -301,6 +301,17 @@ class VyObject(ObjectDescription):
 
         return prefix, fullname
 
+    def _object_hierarchy_parts(self, sig_node):
+        if "fullname" not in sig_node:
+            return ()
+        contract_name = sig_node.get("contract")
+        fullname = sig_node["fullname"]
+
+        if contract_name:
+            return (contract_name, *fullname.split("."))
+        else:
+            return tuple(fullname.split("."))
+
 
 class VyGlobalLike(VyObject):
     option_spec = {
@@ -333,6 +344,10 @@ class VyEvent(VyObject):
             can_collapse=True,
         ),
     ]
+
+
+def foo() -> (int, str):
+    pass
 
 
 class VyEnum(VyObject):
