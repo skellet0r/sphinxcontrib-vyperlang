@@ -469,6 +469,24 @@ class VyFunction(VyObject):
         ),
     ]
 
+    def add_target_and_index(self, name_cls, sig, signode):
+        super().add_target_and_index(name_cls, sig, signode)
+        if "noindexentry" not in self.options:
+            contract_name = self.env.ref_context.get("vy:contract", "")
+            node_id = signode["ids"][0]
+
+            name, _ = name_cls
+            if contract_name:
+                text = _("%s() (in contract %s)") % (name, contract_name)
+                self.indexnode["entries"].append(("single", text, node_id, "", None))
+            else:
+                text = "%s; %s()" % (_("built-in function"), name)
+                self.indexnode["entries"].append(("pair", text, node_id, "", None))
+
+    def get_index_text(self, modname, name_cls):
+        # add index in own add_target_and_index() instead.
+        return None
+
 
 class VyperDomain(Domain):
     """Vyper language domain."""
