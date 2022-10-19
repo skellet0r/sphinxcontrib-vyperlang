@@ -744,6 +744,22 @@ class VyXRefRole(XRefRole):
         return title, target
 
 
+# copied from sphinx/domains/python.py with minor modifications
+def filter_meta_fields(app, domain, objtype, content):
+    """Filter ``:meta:`` field from its docstring."""
+    if domain != "vy":
+        return
+
+    for node in content:
+        if isinstance(node, nodes.field_list):
+            fields = node
+            # removing list items while iterating the list needs reversed()
+            for field in reversed(fields):
+                field_name = field[0].astext().strip()
+                if field_name == "meta" or field_name.startswith("meta "):
+                    node.remove(field)
+
+
 class VyperDomain(Domain):
     """Vyper language domain."""
 
