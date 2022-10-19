@@ -69,7 +69,7 @@ def type_to_xref(
     return pending_xref(
         "",
         nodes.Text(title),
-        refdomain="py",
+        refdomain="vy",
         reftype=reftype,
         reftarget=target,
         refspecific=refspecific,
@@ -291,15 +291,13 @@ class VyObject(ObjectDescription):
 
         signode += addnodes.desc_name(name, name)
         if arglist:
-            # signode += _parse_arglist(arglist, self.env)
-            pass
+            signode += _parse_arglist(arglist, self.env)
         elif self.needs_arglist:
             signode += addnodes.desc_parameterlist()
 
         if retann:
-            # children = _parse_annotation(retann, self.env)
-            # signode += addnodes.desc_returns(retann, '', *children)
-            pass
+            children = _parse_annotation(retann, self.env)
+            signode += addnodes.desc_returns(retann, "", *children)
 
         return prefix, fullname
 
