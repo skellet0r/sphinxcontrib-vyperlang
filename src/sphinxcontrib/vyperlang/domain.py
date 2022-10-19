@@ -1,4 +1,5 @@
 import re
+from typing import Tuple
 
 from docutils.parsers.rst import directives
 from sphinx import addnodes
@@ -21,6 +22,27 @@ VY_SIG_RE = re.compile(
     """,
     re.VERBOSE,
 )
+
+
+# copied from sphinx/domains/python.py with minor modifications
+def parse_reftarget(
+    reftarget: str, suppress_prefix: bool = False
+) -> Tuple[str, str, str, bool]:
+    """Parse a type string and return (reftype, reftarget, title, refspecific flag)"""
+    refspecific = False
+    if reftarget.startswith("."):
+        reftarget = reftarget[1:]
+        title = reftarget
+        refspecific = True
+    elif reftarget.startswith("~"):
+        reftarget = reftarget[1:]
+        title = reftarget.split(".")[-1]
+    elif suppress_prefix:
+        title = reftarget.split(".")[-1]
+    else:
+        title = reftarget
+
+    return "obj", reftarget, title, refspecific
 
 
 class VyObject(ObjectDescription):
