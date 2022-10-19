@@ -379,7 +379,7 @@ class VyObject(ObjectDescription):
 
     @property
     def signature_prefix(self):
-        return []
+        return [nodes.Text(self.objtype), addnodes.desc_sig_space()]
 
     def handle_signature(self, sig, signode):
         mo = VY_SIG_RE.match(sig)
@@ -518,10 +518,13 @@ class VyGlobalLike(VyObject):
 
     @property
     def signature_prefix(self):
+        prefix = super().signature_prefix
         if "public" in self.options:
-            return [addnodes.desc_sig_keyword("", "public"), addnodes.desc_sig_space()]
-        else:
-            return []
+            return [
+                addnodes.desc_sig_keyword("", "public"),
+                addnodes.desc_sig_space(),
+            ] + prefix
+        return prefix
 
     def handle_signature(self, sig, signode):
         fullname, prefix = super().handle_signature(sig, signode)
@@ -967,7 +970,7 @@ class VyperDomain(Domain):
                 del self.objects[fullname]
         for contract_name, contract in list(self.contracts.items()):
             if contract.docname == docname:
-                del self.modules[contract_name]
+                del self.contracts[contract_name]
 
     def merge_domaindata(self, docnames: List[str], otherdata: Dict) -> None:
         # XXX check duplicates?
@@ -976,7 +979,7 @@ class VyperDomain(Domain):
                 self.objects[fullname] = obj
         for contract_name, contract in otherdata["contracts"].items():
             if contract.docname in docnames:
-                self.modules[contract_name] = contract
+                self.contracts[contract_name] = contract
 
     def find_obj(
         self,
@@ -1201,6 +1204,7 @@ def setup(app: Sphinx) -> Dict[str, Any]:
 
     app.add_domain(VyperDomain)
     app.add_config_value("add_contract_names", False, "env")
+    app.add_config_value("contractindex_common_prefix", [], "env")
     app.connect("object-description-transform", filter_meta_fields)
 
     return {
