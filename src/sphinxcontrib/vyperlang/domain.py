@@ -671,6 +671,10 @@ class VyFunction(VyObject):
         ),
     ]
 
+    @property
+    def signature_prefix(self):
+        return [nodes.Text("def"), addnodes.desc_sig_space()]
+
     def add_target_and_index(self, name_cls, sig, signode):
         super().add_target_and_index(name_cls, sig, signode)
         if "noindexentry" not in self.options:
