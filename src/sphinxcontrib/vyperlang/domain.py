@@ -14,6 +14,7 @@ from sphinx.environment import BuildEnvironment
 from sphinx.locale import _
 from sphinx.util.docfields import Field, GroupedField, TypedField
 from sphinx.util.inspect import signature_from_str
+from sphinx.util.nodes import make_id
 
 MUTABILITY = ("nonpayable", "payable", "pure", "view")
 VISIBILITY = ("external", "internal")
@@ -299,7 +300,7 @@ class VyObject(ObjectDescription):
             children = _parse_annotation(retann, self.env)
             signode += addnodes.desc_returns(retann, "", *children)
 
-        return prefix, fullname
+        return fullname, prefix
 
     def _object_hierarchy_parts(self, sig_node):
         if "fullname" not in sig_node:
@@ -314,6 +315,24 @@ class VyObject(ObjectDescription):
 
     def get_index_text(self, modname, name):
         raise NotImplementedError("Must be implemented in subclasses")
+
+    def add_target_and_index(self, name_cls, sig, signode):
+        contract_name = self.env.ref_context.get("vy:contract")
+        fullname = (contract_name + "." if contract_name else "") + name_cls[0]
+
+        node_id = make_id(self.env, self.state.document, "", fullname)
+        signode["ids"].append(node_id)
+        self.state.document.note_explicit_target(signode)
+
+        domain = self.env.get_domain("vy")
+        domain.note_object(fullname, self.objtype, node_id, location=signode)
+
+        if "noindexentry" not in self.options:
+            indextext = self.get_index_text(contract_name, name_cls)
+            if indextext:
+                self.indexnode["entries"].append(
+                    ("single", indextext, node_id, "", None)
+                )
 
 
 class VyGlobalLike(VyObject):
