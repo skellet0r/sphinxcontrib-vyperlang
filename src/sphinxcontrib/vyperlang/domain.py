@@ -515,6 +515,22 @@ class VyGlobalLike(VyObject):
 class VyConstant(VyGlobalLike):
     option_spec = {"value": directives.unchanged_required, **VyGlobalLike.option_spec}
 
+    def handle_signature(self, sig, signode):
+        fullname, prefix = super().handle_signature(sig, signode)
+
+        value = self.options.get("value")
+        if value:
+            signode += addnodes.desc_annotation(
+                value,
+                "",
+                addnodes.desc_sig_space(),
+                addnodes.desc_sig_punctuation("", "="),
+                addnodes.desc_sig_space(),
+                nodes.Text(value),
+            )
+
+        return fullname, prefix
+
 
 class VyEvent(VyObject):
     doc_field_types = [
