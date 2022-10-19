@@ -9,6 +9,7 @@ from docutils.parsers.rst import directives
 from docutils.parsers.rst.states import Inliner
 from sphinx import addnodes
 from sphinx.addnodes import pending_xref
+from sphinx.application import Sphinx
 from sphinx.builders import Builder
 from sphinx.directives import ObjectDescription
 from sphinx.domains import Domain, Index, IndexEntry, ObjType
@@ -1193,3 +1194,18 @@ class VyperDomain(Domain):
             return None
         else:
             return ".".join(filter(None, [contract_name, interface_name, target]))
+
+
+def setup(app: Sphinx) -> Dict[str, Any]:
+    app.setup_extension("sphinx.directives")
+
+    app.add_domain(VyperDomain)
+    app.add_config_value("add_contract_names", False, "env")
+    app.connect("object-description-transform", filter_meta_fields)
+
+    return {
+        "version": "1",
+        "env_version": 1,
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
+    }
