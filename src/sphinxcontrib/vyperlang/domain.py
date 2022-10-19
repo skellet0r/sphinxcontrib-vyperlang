@@ -1,10 +1,13 @@
 import re
-from typing import Tuple
+from typing import Optional, Tuple
 
+from docutils import nodes
 from docutils.parsers.rst import directives
 from sphinx import addnodes
+from sphinx.addnodes import pending_xref
 from sphinx.directives import ObjectDescription
 from sphinx.domains import Domain, ObjType
+from sphinx.environment import BuildEnvironment
 from sphinx.locale import _
 from sphinx.util.docfields import Field, GroupedField, TypedField
 
@@ -43,6 +46,31 @@ def parse_reftarget(
         title = reftarget
 
     return "obj", reftarget, title, refspecific
+
+
+# copied from sphinx/domains/python.py with minor modifications
+def type_to_xref(
+    target: str, env: Optional[BuildEnvironment] = None, suppress_prefix: bool = False
+) -> addnodes.pending_xref:
+    """Convert a type string to a cross reference node."""
+    if env:
+        kwargs = {
+            "vy:contract": env.ref_context.get("vy:contract"),
+            "vy:interface": env.ref_context.get("vy:interface"),
+        }
+    else:
+        kwargs = {}
+
+    reftype, target, title, refspecific = parse_reftarget(target, suppress_prefix)
+    return pending_xref(
+        "",
+        nodes.Text(title),
+        refdomain="py",
+        reftype=reftype,
+        reftarget=target,
+        refspecific=refspecific,
+        **kwargs
+    )
 
 
 class VyObject(ObjectDescription):
