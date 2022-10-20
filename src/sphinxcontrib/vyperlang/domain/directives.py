@@ -1,3 +1,5 @@
+from typing import List
+
 from docutils import nodes
 from sphinx.util.docutils import SphinxDirective, switch_source_input
 from sphinx.util.nodes import nested_parse_with_titles
@@ -9,7 +11,7 @@ class VyContract(SphinxDirective):
     required_arguments = 1
     has_content = True
 
-    def run(self):
+    def run(self) -> List[nodes.Node]:
         self.env.ref_context["vy:contract"] = self.arguments[0]
 
         content_node = nodes.section()
