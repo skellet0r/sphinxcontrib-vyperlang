@@ -20,3 +20,18 @@ class VyContract(SphinxDirective):
             nested_parse_with_titles(self.state, self.content, content_node)
 
         return content_node.children
+
+
+class VyCurrentContract(SphinxDirective):
+    """Directive marking the description of a contract previously defined."""
+
+    required_arguments = 1
+
+    def run(self) -> List[nodes.Node]:
+        cname = self.arguments[0]
+        if cname == "None" and "vy:contract" in self.env.ref_context:
+            del self.env.ref_context["vy:contract"]
+        else:
+            self.env.ref_context["vy:contract"] = cname
+
+        return []

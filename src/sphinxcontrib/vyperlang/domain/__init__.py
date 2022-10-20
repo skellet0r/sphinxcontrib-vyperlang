@@ -1,6 +1,6 @@
 from sphinx.domains import Domain
 
-from sphinxcontrib.vyperlang.domain.directives import VyContract
+from sphinxcontrib.vyperlang.domain.directives import VyContract, VyCurrentContract
 
 
 class VyperDomain(Domain):
@@ -8,4 +8,4 @@ class VyperDomain(Domain):
 
     name = "vy"
     label = "Vyper"
-    directives = {"contract": VyContract}
+    directives = {"contract": VyContract, "currentcontract": VyCurrentContract}
