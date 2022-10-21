@@ -35,18 +35,21 @@ class VyperDomain(Domain):
     indices = [VyperContractIndex]
 
     def add_object(self, name: str, node_id: str, objtype: str, metadata: Dict) -> None:
+        """Add an object to the domain data."""
         objects = self.data.setdefault(objtype, {})
         if name in objects:
             logger.warning(__(f"duplicate description of {name!r}"))
         objects[name] = ObjectEntry(self.env.docname, node_id, objtype, metadata)
 
     def clear_doc(self, docname: str) -> None:
+        """Purge object entries from the domain data which were in a document."""
         for objtype, objects in self.data.copy().items():
             for name, entry in objects.items():
                 if entry.docname == docname:
                     del self.data[objtype][name]
 
     def merge_domaindata(self, docnames: List[str], otherdata: Dict) -> None:
+        """Merge domain data from a parallel process."""
         for objtype, objects in otherdata.items():
             for name, entry in objects.items():
                 if entry.docname not in docnames:
