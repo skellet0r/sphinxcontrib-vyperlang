@@ -1,6 +1,7 @@
 from typing import List
 
 from docutils import nodes
+from docutils.parsers.rst import directives
 from sphinx import addnodes
 from sphinx.util.docutils import SphinxDirective, switch_source_input
 from sphinx.util.nodes import make_id, nested_parse_with_titles
@@ -10,6 +11,7 @@ class VyContract(SphinxDirective):
     """Directive marking the description of a new contract."""
 
     required_arguments = 1
+    option_spec = {"noindex": directives.flag}
     has_content = True
 
     def run(self) -> List[nodes.Node]:
@@ -20,6 +22,9 @@ class VyContract(SphinxDirective):
         with switch_source_input(self.state, self.content):
             content_node.document = self.state.document
             nested_parse_with_titles(self.state, self.content, content_node)
+
+        if "noindex" in self.options:
+            return content_node.children
 
         domain = self.env.get_domain("vy")
         node_id = make_id(self.env, self.state.document, "contract", cname)
