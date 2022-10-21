@@ -2,7 +2,7 @@ from typing import List
 
 from docutils import nodes
 from sphinx.util.docutils import SphinxDirective, switch_source_input
-from sphinx.util.nodes import nested_parse_with_titles
+from sphinx.util.nodes import make_id, nested_parse_with_titles
 
 
 class VyContract(SphinxDirective):
@@ -12,14 +12,23 @@ class VyContract(SphinxDirective):
     has_content = True
 
     def run(self) -> List[nodes.Node]:
-        self.env.ref_context["vy:contract"] = self.arguments[0]
+        cname = self.arguments[0]
+        self.env.ref_context["vy:contract"] = cname
 
         content_node = nodes.section()
         with switch_source_input(self.state, self.content):
             content_node.document = self.state.document
             nested_parse_with_titles(self.state, self.content, content_node)
 
-        return content_node.children
+        domain = self.env.get_domain("vy")
+        node_id = make_id(self.env, self.state.document, "contract", cname)
+        target = nodes.target("", "", ids=[node_id], is_contract=True)
+
+        self.set_source_info(target)
+        self.state.document.note_explicit_target(target)
+        domain.add_contract(cname, cname)
+
+        return [target, *content_node.children]
 
 
 class VyCurrentContract(SphinxDirective):
