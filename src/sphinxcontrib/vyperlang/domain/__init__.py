@@ -35,7 +35,7 @@ class VyperDomain(Domain):
         self.contracts[name] = ContractEntry(self.env.docname, node_id)
 
     def clear_doc(self, docname: str) -> None:
-        for contract, entry in self.contracts.items():
+        for contract, entry in self.contracts.copy().items():
             if entry.docname == docname:
                 del self.contracts[contract]
 
