@@ -16,11 +16,19 @@ class VyperContractIndex(Index):
     ) -> Tuple[List[Tuple[str, List[IndexEntry]]], bool]:
         content: Dict[str, List[IndexEntry]] = {}
 
-        for contract, (docname, node_id, synopsis) in self.domain.contracts.items():
-            if docnames and docname not in docnames:
+        for name, entry in self.domain.data.setdefault("contract", {}).items():
+            if docnames and entry.docname not in docnames:
                 continue
 
-            entry = IndexEntry(contract, 0, docname, node_id, "", "", synopsis)
-            content.setdefault(contract[0].lower(), []).append(entry)
+            entry = IndexEntry(
+                name,
+                0,
+                entry.docname,
+                entry.node_id,
+                "",
+                "",
+                entry.metadata["synopsis"],
+            )
+            content.setdefault(name[0].lower(), []).append(entry)
 
         return sorted(content.items()), False
