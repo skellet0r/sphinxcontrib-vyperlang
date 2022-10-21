@@ -16,7 +16,8 @@ class VyperContractIndex(Index):
     ) -> Tuple[List[Tuple[str, List[IndexEntry]]], bool]:
         content: Dict[str, List[IndexEntry]] = {}
 
-        for name, entry in self.domain.data.setdefault("contract", {}).items():
+        contracts = self.domain.objects.setdefault("contract", {})
+        for name, entry in contracts.items():
             if docnames and entry.docname not in docnames:
                 continue
 
