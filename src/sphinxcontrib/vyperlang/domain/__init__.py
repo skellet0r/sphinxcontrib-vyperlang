@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 class ObjectEntry(NamedTuple):
     docname: str
     node_id: str
-    objtype: str
     metadata: Dict[str, Any]
 
 
@@ -45,11 +44,11 @@ class VyperDomain(Domain):
         objects = self.objects.setdefault(objtype, {})
         if name in objects:
             logger.warning(__(f"duplicate description of {name!r}"))
-        objects[name] = ObjectEntry(self.env.docname, node_id, objtype, metadata)
+        objects[name] = ObjectEntry(self.env.docname, node_id, metadata)
 
     def clear_doc(self, docname: str) -> None:
         """Purge object entries from the domain data which were in a document."""
-        for objtype, objects in self.objects.copy().items():
+        for objtype, objects in self.objects.items():
             for name, entry in objects.copy().items():
                 if entry.docname == docname:
                     del self.objects[objtype][name]
