@@ -10,6 +10,7 @@ from sphinx.roles import XRefRole
 from sphinx.util.nodes import make_refnode
 
 from sphinxcontrib.vyperlang.domain.directives import VyContract, VyCurrentContract
+from sphinxcontrib.vyperlang.domain.indices import VyperContractIndex
 
 
 class ContractEntry(NamedTuple):
@@ -26,6 +27,7 @@ class VyperDomain(Domain):
     directives = {"contract": VyContract, "currentcontract": VyCurrentContract}
     roles = {"contract": XRefRole()}
     initial_data: Dict[str, Dict[str, NamedTuple]] = {"contracts": {}}
+    indices = [VyperContractIndex]
 
     @property
     def contracts(self) -> Dict:
