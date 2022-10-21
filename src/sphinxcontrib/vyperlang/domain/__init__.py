@@ -2,6 +2,7 @@ from typing import Dict, Iterable, List, NamedTuple, Tuple
 
 from sphinx.domains import Domain, ObjType
 from sphinx.locale import _
+from sphinx.roles import XRefRole
 
 from sphinxcontrib.vyperlang.domain.directives import VyContract, VyCurrentContract
 
@@ -16,8 +17,9 @@ class VyperDomain(Domain):
 
     name = "vy"
     label = "Vyper"
-    object_types = {"contract": ObjType(_("contract"))}
+    object_types = {"contract": ObjType(_("contract"), "contract")}
     directives = {"contract": VyContract, "currentcontract": VyCurrentContract}
+    roles = {"contract": XRefRole()}
     initial_data: Dict[str, Dict[str, NamedTuple]] = {"contracts": {}}
 
     @property
