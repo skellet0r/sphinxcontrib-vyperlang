@@ -34,7 +34,9 @@ class VyperDomain(Domain):
     initial_data: Dict[str, Dict[str, ObjectEntry]] = {}
     indices = [VyperContractIndex]
 
-    def add_object(self, name: str, node_id: str, objtype: str, metadata: Dict) -> None:
+    def add_object(
+        self, name: str, node_id: str, objtype: str, **metadata: Any
+    ) -> None:
         """Add an object to the domain data."""
         objects = self.data.setdefault(objtype, {})
         if name in objects:
