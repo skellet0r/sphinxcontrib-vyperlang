@@ -1,6 +1,7 @@
 from typing import List
 
 from docutils import nodes
+from sphinx import addnodes
 from sphinx.util.docutils import SphinxDirective, switch_source_input
 from sphinx.util.nodes import make_id, nested_parse_with_titles
 
@@ -23,12 +24,15 @@ class VyContract(SphinxDirective):
         domain = self.env.get_domain("vy")
         node_id = make_id(self.env, self.state.document, "contract", cname)
         target = nodes.target("", "", ids=[node_id], is_contract=True)
+        index = addnodes.index(
+            entries=[("single", f"{cname} (contract)", node_id, "", None)]
+        )
 
         self.set_source_info(target)
         self.state.document.note_explicit_target(target)
         domain.add_contract(cname, cname)
 
-        return [target, *content_node.children]
+        return [target, index, *content_node.children]
 
 
 class VyCurrentContract(SphinxDirective):
