@@ -1,4 +1,4 @@
-from typing import Dict, NamedTuple
+from typing import Dict, Iterable, List, NamedTuple, Tuple
 
 from sphinx.domains import Domain, ObjType
 from sphinx.locale import _
@@ -31,3 +31,13 @@ class VyperDomain(Domain):
         for contract, entry in self.contracts.items():
             if entry.docname == docname:
                 del self.contracts[contract]
+
+    def merge_domaindata(self, docnames: List[str], otherdata: Dict) -> None:
+        for contract, entry in otherdata["contracts"].items():
+            if entry.docname in docnames:
+                self.contracts[contract] = entry
+
+    def get_objects(self) -> Iterable[Tuple[str, str, str, str, str, int]]:
+        for contract, entry in self.contracts.items():
+            # (name, dispname, type, docname, anchor, priority)
+            yield (contract, contract, "contract", entry.docname, entry.node_id, 0)
