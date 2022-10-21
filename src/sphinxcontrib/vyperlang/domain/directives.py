@@ -11,7 +11,7 @@ class VyContract(SphinxDirective):
     """Directive marking the description of a new contract."""
 
     required_arguments = 1
-    option_spec = {"noindex": directives.flag}
+    option_spec = {"noindex": directives.flag, "synopsis": directives.unchanged}
     has_content = True
 
     def run(self) -> List[nodes.Node]:
@@ -35,7 +35,7 @@ class VyContract(SphinxDirective):
 
         self.set_source_info(target)
         self.state.document.note_explicit_target(target)
-        domain.add_contract(cname, cname)
+        domain.add_contract(cname, node_id, self.options.get("synopsis", ""))
 
         return [target, index, *content_node.children]
 
