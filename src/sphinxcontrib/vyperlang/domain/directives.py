@@ -3,6 +3,9 @@ from typing import List
 from docutils import nodes
 from docutils.parsers.rst import directives
 from sphinx import addnodes
+from sphinx.directives import ObjectDescription
+from sphinx.locale import _
+from sphinx.util.docfields import TypedField
 from sphinx.util.docutils import SphinxDirective, switch_source_input
 from sphinx.util.nodes import make_id, nested_parse_with_titles
 
@@ -53,3 +56,24 @@ class VyCurrentContract(SphinxDirective):
             self.env.ref_context["vy:contract"] = cname
 
         return []
+
+
+class VyEvent(ObjectDescription):
+    """Directive marking the description of an event."""
+
+    doc_field_types = [
+        TypedField(
+            "topics",
+            names=("topic",),
+            typenames=("type", "topictype"),
+            label=_("Topics"),
+            can_collapse=True,
+        ),
+        TypedField(
+            "data",
+            names=("data"),
+            typenames=("type", "datatype"),
+            label=_("Data"),
+            can_collapse=True,
+        ),
+    ]
