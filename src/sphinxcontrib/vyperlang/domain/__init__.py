@@ -16,6 +16,7 @@ from sphinxcontrib.vyperlang.domain.indices import VyperContractIndex
 class ContractEntry(NamedTuple):
     docname: str
     node_id: str
+    synopsis: str
 
 
 class VyperDomain(Domain):
@@ -33,8 +34,8 @@ class VyperDomain(Domain):
     def contracts(self) -> Dict:
         return self.data.setdefault("contracts", {})
 
-    def add_contract(self, name: str, node_id: str) -> None:
-        self.contracts[name] = ContractEntry(self.env.docname, node_id)
+    def add_contract(self, name: str, node_id: str, synopsis: str) -> None:
+        self.contracts[name] = ContractEntry(self.env.docname, node_id, synopsis)
 
     def clear_doc(self, docname: str) -> None:
         for contract, entry in self.contracts.copy().items():
