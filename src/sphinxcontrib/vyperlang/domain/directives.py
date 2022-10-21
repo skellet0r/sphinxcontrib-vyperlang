@@ -33,7 +33,9 @@ class VyContract(SphinxDirective):
 
         self.set_source_info(target)
         self.state.document.note_explicit_target(target)
-        domain.add_contract(cname, node_id, self.options.get("synopsis", ""))
+        domain.add_object(
+            cname, node_id, "contract", synopsis=self.options.get("synopsis", "")
+        )
 
         return [target, index, *content_node.children]
 
