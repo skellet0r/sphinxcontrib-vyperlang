@@ -28,7 +28,7 @@ class VyContract(SphinxDirective):
 
         domain = self.env.get_domain("vy")
         node_id = make_id(self.env, self.state.document, "contract", cname)
-        target = nodes.target("", "", ids=[node_id], is_contract=True)
+        target = nodes.target("", "", ids=[node_id])
         index = addnodes.index(entries=[("single", cname, node_id, "", None)])
 
         self.set_source_info(target)
