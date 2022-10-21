@@ -1,13 +1,17 @@
-from typing import List
+import re
+from typing import List, Tuple
 
 from docutils import nodes
 from docutils.parsers.rst import directives
 from sphinx import addnodes
 from sphinx.directives import ObjectDescription
-from sphinx.locale import _
+from sphinx.locale import _, __
+from sphinx.util import logging
 from sphinx.util.docfields import TypedField
 from sphinx.util.docutils import SphinxDirective, switch_source_input
 from sphinx.util.nodes import make_id, nested_parse_with_titles
+
+logger = logging.getLogger(__name__)
 
 
 class VyContract(SphinxDirective):
@@ -65,15 +69,60 @@ class VyEvent(ObjectDescription):
         TypedField(
             "topics",
             names=("topic",),
-            typenames=("type", "topictype"),
+            typenames=("topictype",),
             label=_("Topics"),
             can_collapse=True,
         ),
         TypedField(
             "data",
-            names=("data"),
-            typenames=("type", "datatype"),
+            names=("data",),
+            typenames=("datatype",),
             label=_("Data"),
             can_collapse=True,
         ),
     ]
+
+    def handle_signature(self, sig: str, signode: addnodes.desc_signature) -> str:
+        mo = re.fullmatch(r"\w+", sig)
+        if mo is None:
+            logger.warning(__(f"invalid event signature: {sig!r}"))
+            raise ValueError
+
+        cname = self.env.ref_context.get("vy:contract")
+        if cname is None:
+            logger.warning(__(f"event encountered outside of a contract: {sig!r}"))
+            raise ValueError
+
+        signode["contract"] = cname
+        signode["fullname"] = fullname = f"{cname}.{sig}"
+
+        if self.env.config.vy_add_contract_names:
+            nodetext = cname + "."
+            signode += addnodes.desc_addname(nodetext, nodetext)
+
+        signode += addnodes.desc_name(sig, sig)
+        return fullname
+
+    def _object_hierarchy_parts(
+        self, signode: addnodes.desc_signature
+    ) -> Tuple[str, ...]:
+        fullname = signode.get("fullname", "")
+        return tuple(fullname.split("."))
+
+    def _toc_entry_name(self, signode: addnodes.desc_signature) -> str:
+        return signode.get("fullname")
+
+    def add_target_and_index(
+        self, fullname: str, sig: str, signode: addnodes.desc_signature
+    ) -> None:
+        cname = self.env.ref_context.get("vy:contract")
+        domain = self.env.get_domain("vy")
+        node_id = make_id(self.env, self.state.document, "", fullname)
+
+        signode["ids"].append(node_id)
+        self.state.document.note_explicit_target(signode)
+        domain.add_object(fullname, node_id, self.objtype)
+
+        if "noindexentry" not in self.options:
+            indextext = _(f"{sig}; {cname}")
+            self.indexnode["entries"].append(("pair", indextext, node_id, "", None))
