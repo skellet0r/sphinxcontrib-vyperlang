@@ -1,8 +1,13 @@
-from typing import Dict, Iterable, List, NamedTuple, Tuple
+from typing import Dict, Iterable, List, NamedTuple, Optional, Tuple
 
+from docutils import nodes
+from sphinx.addnodes import pending_xref
+from sphinx.builders import Builder
 from sphinx.domains import Domain, ObjType
+from sphinx.environment import BuildEnvironment
 from sphinx.locale import _
 from sphinx.roles import XRefRole
+from sphinx.util.nodes import make_refnode
 
 from sphinxcontrib.vyperlang.domain.directives import VyContract, VyCurrentContract
 
@@ -43,3 +48,21 @@ class VyperDomain(Domain):
         for contract, entry in self.contracts.items():
             # (name, dispname, type, docname, anchor, priority)
             yield (contract, contract, "contract", entry.docname, entry.node_id, 0)
+
+    def resolve_xref(
+        self,
+        env: BuildEnvironment,
+        fromdocname: str,
+        builder: Builder,
+        typ: str,
+        target: str,
+        node: pending_xref,
+        contnode: nodes.Element,
+    ) -> Optional[nodes.Element]:
+        if target not in self.contracts:
+            return None
+
+        entry = self.contracts[target]
+        return make_refnode(
+            builder, fromdocname, entry.docname, entry.node_id, contnode, target
+        )
