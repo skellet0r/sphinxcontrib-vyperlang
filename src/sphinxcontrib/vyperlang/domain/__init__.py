@@ -1,7 +1,14 @@
+from typing import Dict, NamedTuple
+
 from sphinx.domains import Domain, ObjType
 from sphinx.locale import _
 
 from sphinxcontrib.vyperlang.domain.directives import VyContract, VyCurrentContract
+
+
+class ContractEntry(NamedTuple):
+    docname: str
+    node_id: str
 
 
 class VyperDomain(Domain):
@@ -11,3 +18,11 @@ class VyperDomain(Domain):
     label = "Vyper"
     object_types = {"contract": ObjType(_("contract"))}
     directives = {"contract": VyContract, "currentcontract": VyCurrentContract}
+    initial_data: Dict[str, Dict[str, NamedTuple]] = {"contracts": {}}
+
+    @property
+    def contracts(self) -> Dict:
+        return self.data.setdefault("contracts", {})
+
+    def add_contract(self, name: str, docname: str, node_id: str) -> None:
+        self.contracts[name] = ContractEntry(docname, node_id)
