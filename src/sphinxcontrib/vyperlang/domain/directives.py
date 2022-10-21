@@ -110,7 +110,7 @@ class VyEvent(ObjectDescription):
         return tuple(fullname.split("."))
 
     def _toc_entry_name(self, signode: addnodes.desc_signature) -> str:
-        return signode.get("fullname")
+        return signode.get("fullname", "")
 
     def add_target_and_index(
         self, fullname: str, sig: str, signode: addnodes.desc_signature
