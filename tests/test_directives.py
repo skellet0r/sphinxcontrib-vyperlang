@@ -7,6 +7,12 @@ def test_vy_contract(app):
     assert doctree.settings.env.ref_context.get("vy:contract") == "sphinx"
 
 
+def test_vy_contract_updates_domain_data(app):
+    text = ".. vy:contract:: sphinx"
+    doctree = restructuredtext.parse(app, text)
+    assert "sphinx" in doctree.settings.env.domains["vy"].contracts
+
+
 def test_vy_contract_rendered_text(app):
     text = ".. vy:contract:: sphinx"
     doctree = restructuredtext.parse(app, text)
