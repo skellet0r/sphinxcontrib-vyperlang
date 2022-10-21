@@ -10,7 +10,11 @@ from sphinx.roles import XRefRole
 from sphinx.util import logging
 from sphinx.util.nodes import make_refnode
 
-from sphinxcontrib.vyperlang.domain.directives import VyContract, VyCurrentContract
+from sphinxcontrib.vyperlang.domain.directives import (
+    VyContract,
+    VyCurrentContract,
+    VyEvent,
+)
 from sphinxcontrib.vyperlang.domain.indices import VyperContractIndex
 
 logger = logging.getLogger(__name__)
@@ -27,9 +31,16 @@ class VyperDomain(Domain):
 
     name = "vy"
     label = "Vyper"
-    object_types = {"contract": ObjType(_("contract"), "contract")}
-    directives = {"contract": VyContract, "currentcontract": VyCurrentContract}
-    roles = {"contract": XRefRole()}
+    object_types = {
+        "contract": ObjType(_("contract"), "contract"),
+        "event": ObjType(_("event"), "event"),
+    }
+    directives = {
+        "contract": VyContract,
+        "currentcontract": VyCurrentContract,
+        "event": VyEvent,
+    }
+    roles = {"contract": XRefRole(), "event": XRefRole()}
     initial_data: Dict[str, Dict[str, ObjectEntry]] = {"objects": {}}
     indices = [VyperContractIndex]
 
