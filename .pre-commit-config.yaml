@@ -22,4 +22,5 @@ repos:
     rev: v0.982
     hooks:
       - id: mypy
+        files: 'src/'
         additional_dependencies: ['types-docutils']
