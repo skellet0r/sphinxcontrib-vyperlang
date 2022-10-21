@@ -31,24 +31,28 @@ class VyperDomain(Domain):
     object_types = {"contract": ObjType(_("contract"), "contract")}
     directives = {"contract": VyContract, "currentcontract": VyCurrentContract}
     roles = {"contract": XRefRole()}
-    initial_data: Dict[str, Dict[str, ObjectEntry]] = {}
+    initial_data: Dict[str, Dict[str, ObjectEntry]] = {"objects": {}}
     indices = [VyperContractIndex]
+
+    @property
+    def objects(self) -> Dict:
+        return self.data.setdefault("objects", {})
 
     def add_object(
         self, name: str, node_id: str, objtype: str, **metadata: Any
     ) -> None:
         """Add an object to the domain data."""
-        objects = self.data.setdefault(objtype, {})
+        objects = self.objects.setdefault(objtype, {})
         if name in objects:
             logger.warning(__(f"duplicate description of {name!r}"))
         objects[name] = ObjectEntry(self.env.docname, node_id, objtype, metadata)
 
     def clear_doc(self, docname: str) -> None:
         """Purge object entries from the domain data which were in a document."""
-        for objtype, objects in self.data.copy().items():
-            for name, entry in objects.items():
+        for objtype, objects in self.objects.copy().items():
+            for name, entry in objects.copy().items():
                 if entry.docname == docname:
-                    del self.data[objtype][name]
+                    del self.objects[objtype][name]
 
     def merge_domaindata(self, docnames: List[str], otherdata: Dict) -> None:
         """Merge domain data from a parallel process."""
@@ -56,12 +60,12 @@ class VyperDomain(Domain):
             for name, entry in objects.items():
                 if entry.docname not in docnames:
                     continue
-                elif name in self.data.setdefault(objtype, {}):
+                elif name in self.objects.setdefault(objtype, {}):
                     logger.warning(__(f"duplicate description of {name!r}"))
-                self.data[objtype][name] = entry
+                self.objects[objtype][name] = entry
 
     def get_objects(self) -> Iterable[Tuple[str, str, str, str, str, int]]:
-        for objtype, objects in self.data.items():
+        for objtype, objects in self.objects.items():
             for name, entry in objects.items():
                 yield (name, name, objtype, entry.docname, entry.node_id, 0)
 
@@ -75,7 +79,7 @@ class VyperDomain(Domain):
         node: pending_xref,
         contnode: nodes.Element,
     ) -> Optional[nodes.Element]:
-        objects = self.data.setdefault(typ, {})
+        objects = self.objects.setdefault(typ, {})
         if target not in objects:
             return None
 
