@@ -7,7 +7,7 @@ def test_vy_contract(app):
     assert doctree.settings.env.ref_context.get("vy:contract") == "sphinx"
 
 
-def test_vy_contract_rendered(app):
+def test_vy_contract_rendered_text(app):
     text = ".. vy:contract:: sphinx"
     doctree = restructuredtext.parse(app, text)
     assert doctree.astext() == ""
@@ -33,7 +33,7 @@ def test_vy_current_contract_clears_contract(app):
     assert doctree.settings.env.ref_context.get("vy:contract") is None
 
 
-def test_vy_current_contract_rendered(app):
+def test_vy_current_contract_rendered_text(app):
     text = ".. vy:currentcontract:: sphinx"
     doctree = restructuredtext.parse(app, text)
     assert doctree.astext() == ""
