@@ -10,7 +10,7 @@ Welcome to sphinxcontrib-vyperlang's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-
+   domain
 
 Indices and tables
 ==================
