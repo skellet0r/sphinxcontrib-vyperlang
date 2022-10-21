@@ -1,22 +1,26 @@
-from typing import Dict, Iterable, List, NamedTuple, Optional, Tuple
+from typing import Any, Dict, Iterable, List, NamedTuple, Optional, Tuple
 
 from docutils import nodes
 from sphinx.addnodes import pending_xref
 from sphinx.builders import Builder
 from sphinx.domains import Domain, ObjType
 from sphinx.environment import BuildEnvironment
-from sphinx.locale import _
+from sphinx.locale import _, __
 from sphinx.roles import XRefRole
+from sphinx.util import logging
 from sphinx.util.nodes import make_refnode
 
 from sphinxcontrib.vyperlang.domain.directives import VyContract, VyCurrentContract
 from sphinxcontrib.vyperlang.domain.indices import VyperContractIndex
 
+logger = logging.getLogger(__name__)
 
-class ContractEntry(NamedTuple):
+
+class ObjectEntry(NamedTuple):
     docname: str
     node_id: str
-    synopsis: str
+    objtype: str
+    metadata: Dict[str, Any]
 
 
 class VyperDomain(Domain):
@@ -27,30 +31,34 @@ class VyperDomain(Domain):
     object_types = {"contract": ObjType(_("contract"), "contract")}
     directives = {"contract": VyContract, "currentcontract": VyCurrentContract}
     roles = {"contract": XRefRole()}
-    initial_data: Dict[str, Dict[str, NamedTuple]] = {"contracts": {}}
+    initial_data: Dict[str, Dict[str, ObjectEntry]] = {}
     indices = [VyperContractIndex]
 
-    @property
-    def contracts(self) -> Dict:
-        return self.data.setdefault("contracts", {})
-
-    def add_contract(self, name: str, node_id: str, synopsis: str) -> None:
-        self.contracts[name] = ContractEntry(self.env.docname, node_id, synopsis)
+    def add_object(self, name: str, node_id: str, objtype: str, metadata: Dict) -> None:
+        objects = self.data.setdefault(objtype, {})
+        if name in objects:
+            logger.warning(__(f"duplicate description of {name!r}"))
+        objects[name] = ObjectEntry(self.env.docname, node_id, objtype, metadata)
 
     def clear_doc(self, docname: str) -> None:
-        for contract, entry in self.contracts.copy().items():
-            if entry.docname == docname:
-                del self.contracts[contract]
+        for objtype, objects in self.data.copy().items():
+            for name, entry in objects.items():
+                if entry.docname == docname:
+                    del self.data[objtype][name]
 
     def merge_domaindata(self, docnames: List[str], otherdata: Dict) -> None:
-        for contract, entry in otherdata["contracts"].items():
-            if entry.docname in docnames:
-                self.contracts[contract] = entry
+        for objtype, objects in otherdata.items():
+            for name, entry in objects.items():
+                if entry.docname not in docnames:
+                    continue
+                elif name in self.data.setdefault(objtype, {}):
+                    logger.warning(__(f"duplicate description of {name!r}"))
+                self.data[objtype][name] = entry
 
     def get_objects(self) -> Iterable[Tuple[str, str, str, str, str, int]]:
-        for contract, entry in self.contracts.items():
-            # (name, dispname, type, docname, anchor, priority)
-            yield (contract, contract, "contract", entry.docname, entry.node_id, 0)
+        for objtype, objects in self.data.items():
+            for name, entry in objects.items():
+                yield (name, name, objtype, entry.docname, entry.node_id, 0)
 
     def resolve_xref(
         self,
@@ -62,10 +70,11 @@ class VyperDomain(Domain):
         node: pending_xref,
         contnode: nodes.Element,
     ) -> Optional[nodes.Element]:
-        if target not in self.contracts:
+        objects = self.data.setdefault(typ, {})
+        if target not in objects:
             return None
 
-        entry = self.contracts[target]
+        entry = objects[target]
         return make_refnode(
             builder, fromdocname, entry.docname, entry.node_id, contnode, target
         )
