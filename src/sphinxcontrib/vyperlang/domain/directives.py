@@ -7,7 +7,7 @@ from sphinx import addnodes
 from sphinx.directives import ObjectDescription
 from sphinx.locale import _, __
 from sphinx.util import logging
-from sphinx.util.docfields import TypedField
+from sphinx.util.docfields import GroupedField, TypedField
 from sphinx.util.docutils import SphinxDirective, switch_source_input
 from sphinx.util.nodes import make_id, nested_parse_with_titles
 
@@ -133,4 +133,31 @@ class VyEvent(VySimpleObjectBase):
             label=_("Data"),
             can_collapse=True,
         ),
+    ]
+
+
+class VyEnum(VySimpleObjectBase):
+    """Directive marking the description of an enum."""
+
+    doc_field_types = [
+        GroupedField(
+            "elements",
+            names=("element", "elem"),
+            label=_("Elements"),
+            can_collapse=True,
+        )
+    ]
+
+
+class VyStruct(VySimpleObjectBase):
+    """Directive marking the description of a struct."""
+
+    doc_field_types = [
+        TypedField(
+            "members",
+            names=("member"),
+            typenames=("membertype",),
+            label=_("Members"),
+            can_collapse=True,
+        )
     ]
