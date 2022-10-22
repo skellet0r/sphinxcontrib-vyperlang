@@ -13,7 +13,9 @@ from sphinx.util.nodes import make_refnode
 from sphinxcontrib.vyperlang.domain.directives import (
     VyContract,
     VyCurrentContract,
+    VyEnum,
     VyEvent,
+    VyStruct,
 )
 from sphinxcontrib.vyperlang.domain.indices import VyperContractIndex
 
@@ -34,13 +36,22 @@ class VyperDomain(Domain):
     object_types = {
         "contract": ObjType(_("contract"), "contract"),
         "event": ObjType(_("event"), "event"),
+        "enum": ObjType(_("enum"), "enum"),
+        "struct": ObjType(_("struct"), "struct"),
     }
     directives = {
         "contract": VyContract,
         "currentcontract": VyCurrentContract,
         "event": VyEvent,
+        "enum": VyEnum,
+        "struct": VyStruct,
     }
-    roles = {"contract": XRefRole(), "event": XRefRole()}
+    roles = {
+        "contract": XRefRole(),
+        "event": XRefRole(),
+        "enum": XRefRole(),
+        "struct": XRefRole(),
+    }
     initial_data: Dict[str, Dict[str, ObjectEntry]] = {"objects": {}}
     indices = [VyperContractIndex]
 
