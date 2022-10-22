@@ -13,6 +13,8 @@ from sphinx.util.nodes import make_id, nested_parse_with_titles
 
 logger = logging.getLogger(__name__)
 
+SIMPLE_SIG = re.compile(r"\w+")
+
 
 class VyContract(SphinxDirective):
     """Directive marking the description of a new contract."""
@@ -62,35 +64,20 @@ class VyCurrentContract(SphinxDirective):
         return []
 
 
-class VyEvent(ObjectDescription):
-    """Directive marking the description of an event."""
-
-    doc_field_types = [
-        TypedField(
-            "topics",
-            names=("topic",),
-            typenames=("topictype",),
-            label=_("Topics"),
-            can_collapse=True,
-        ),
-        TypedField(
-            "data",
-            names=("data",),
-            typenames=("datatype",),
-            label=_("Data"),
-            can_collapse=True,
-        ),
-    ]
+class VySimpleObjectBase(ObjectDescription):
+    """Base class for VyEvent, VyEnum, and VyStruct."""
 
     def handle_signature(self, sig: str, signode: addnodes.desc_signature) -> str:
-        mo = re.fullmatch(r"\w+", sig)
+        mo = SIMPLE_SIG.fullmatch(sig)
         if mo is None:
-            logger.warning(__(f"invalid event signature: {sig!r}"))
+            logger.warning(__(f"invalid {self.objtype} signature: {sig!r}"))
             raise ValueError
 
         cname = self.env.ref_context.get("vy:contract")
         if cname is None:
-            logger.warning(__(f"event encountered outside of a contract: {sig!r}"))
+            logger.warning(
+                __(f"{self.objtype} encountered outside of a contract: {sig!r}")
+            )
             raise ValueError
 
         signode["contract"] = cname
@@ -126,3 +113,24 @@ class VyEvent(ObjectDescription):
         if "noindexentry" not in self.options:
             indextext = _(f"{sig}; {cname}")
             self.indexnode["entries"].append(("pair", indextext, node_id, "", None))
+
+
+class VyEvent(VySimpleObjectBase):
+    """Directive marking the description of an event."""
+
+    doc_field_types = [
+        TypedField(
+            "topics",
+            names=("topic",),
+            typenames=("topictype",),
+            label=_("Topics"),
+            can_collapse=True,
+        ),
+        TypedField(
+            "data",
+            names=("data",),
+            typenames=("datatype",),
+            label=_("Data"),
+            can_collapse=True,
+        ),
+    ]
