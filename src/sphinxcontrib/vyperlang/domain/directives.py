@@ -155,7 +155,7 @@ class VyStruct(VySimpleObjectBase):
     doc_field_types = [
         TypedField(
             "members",
-            names=("member"),
+            names=("member",),
             typenames=("membertype",),
             label=_("Members"),
             can_collapse=True,
