@@ -24,6 +24,30 @@ The Vyper domain (name **vy**) provides the following directives:
     This is helpful in situations where documentation for objects in a contract are
     spread over multiple files or sections.
 
+.. rst:directive:: .. vy:enum:: name
+
+    Describes an enum.
+
+    .. rubric:: Info Fields
+
+    * ``element``: Description of an element.
+
+    .. code-block:: rst
+
+        .. vy:enum:: Roles
+
+            :element Admin: An account with special privileges.
+            :element Custodian: An account with privilege to call custodial functions.
+            :element User: An account allowed to call user-facing functions.
+
+    This will render like this:
+
+    .. vy:enum:: Roles
+
+        :element Admin: An account with special privileges.
+        :element Custodian: An account with privilege to call custodial functions.
+        :element User: An account allowed to call user-facing functions.
+
 .. rst:directive:: .. vy:event:: name
 
     Describes an event.
