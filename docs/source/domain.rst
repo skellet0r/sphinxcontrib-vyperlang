@@ -84,3 +84,11 @@ matching identifier is found:
 .. rst:role:: vy:contract
 
     Reference a contract.
+
+.. rst:role:: vy:enum
+
+    Reference an enum.
+
+.. rst:role:: vy:event
+
+    Reference an event.
