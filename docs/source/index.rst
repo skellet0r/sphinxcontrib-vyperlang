@@ -1,20 +1,39 @@
-.. sphinxcontrib-vyperlang documentation master file, created by
-   sphinx-quickstart on Fri Oct 21 14:43:37 2022.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Sphinx Vyperlang Extension
+==========================
 
-Welcome to sphinxcontrib-vyperlang's documentation!
-===================================================
+Documentation for the ``sphinxcontract.vyperlang`` extension.
+
+Quickstart
+----------
+
+#. Install this extension:
+
+   .. code-block:: shell
+
+      $ pip install git+https://github.com/skellet0r/sphinxcontrib-vyperlang#egg=sphinxcontrib
+
+#. Add ``sphinxcontrib.vyperlang`` to your extensions list in the Sphinx *conf.py* file:
+
+   .. code-block:: python
+      :linenos:
+      :lineno-start: 14
+      :emphasize-lines: 4
+
+      # -- General configuration ---------------------------------------------------
+      # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
+
+      extensions = [..., "sphinxcontrib.vyperlang"]
+
+Table of Contents
+-----------------
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
    domain
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
