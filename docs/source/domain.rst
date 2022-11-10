@@ -1,7 +1,7 @@
 The Vyper Domain
 ================
 
-The Vyper domain (name **py**) provides the following directives:
+The Vyper domain (name **vy**) provides the following directives:
 
 .. rst:directive:: .. vy:contract:: name
 
