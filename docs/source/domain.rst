@@ -24,6 +24,33 @@ The Vyper domain (name **vy**) provides the following directives:
     This is helpful in situations where documentation for objects in a contract are
     spread over multiple files or sections.
 
+.. rst:directive:: .. vy:event:: name
+
+    Describes an event.
+
+    .. rubric:: Info Fields
+
+    * ``topic``: Description of an indexed parameter.
+    * ``topictype``: Type of a topic.
+    * ``data``: Description of a non-indexed parameter.
+    * ``datatype``: Type of data.
+
+    .. code-block:: rst
+
+        .. vy:event:: Transfer
+
+            :topic address sender: The account tokens originated from.
+            :topic address receiver: The account tokens were credited to.
+            :data uint256 value: The amount of tokens transferred.
+
+    This will render like this:
+
+    .. vy:event:: Transfer
+
+        :topic address sender: The account tokens originated from.
+        :topic address receiver: The account tokens were credited to.
+        :data uint256 value: The amount of tokens transferred.
+
 Roles
 -----
 
