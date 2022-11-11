@@ -64,7 +64,8 @@ The Vyper domain (name **vy**) provides the following directives:
         .. vy:event:: Transfer
 
             :topic address sender: The account tokens originated from.
-            :topic address receiver: The account tokens were credited to.
+            :topic receiver: The account tokens were credited to.
+            :topictype receiver: address
             :data uint256 value: The amount of tokens transferred.
 
     This will render like this:
@@ -72,8 +73,34 @@ The Vyper domain (name **vy**) provides the following directives:
     .. vy:event:: Transfer
 
         :topic address sender: The account tokens originated from.
-        :topic address receiver: The account tokens were credited to.
+        :topic receiver: The account tokens were credited to.
+        :topictype receiver: address
         :data uint256 value: The amount of tokens transferred.
+
+.. rst:directive:: .. vy:struct:: name
+
+    Describes a struct.
+
+    .. rubric:: Info Fields
+
+    * ``member``: Description of a member.
+    * ``membertype``: Type of a member.
+
+    .. code-block:: rst
+
+        .. vy:struct:: Point
+
+            :member int256 x: The x-coordinate.
+            :member y: The y-coordinate.
+            :membertype y: int256
+
+    This will render like this:
+
+    .. vy:struct:: Point
+
+        :member int256 x: The x-coordinate.
+        :member y: The y-coordinate.
+        :membertype y: int256
 
 Roles
 -----
@@ -92,3 +119,7 @@ matching identifier is found:
 .. rst:role:: vy:event
 
     Reference an event.
+
+.. rst:role:: vy:struct
+
+    Reference a struct.
