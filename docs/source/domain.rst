@@ -108,68 +108,36 @@ The Vyper domain (name **vy**) provides the following directives:
         :member y: The y-coordinate.
         :membertype y: int256
 
-.. rst:directive:: .. vy:constant:: name
+.. rst:directive:: .. vy:variable:: name
 
-    Describes a constant.
+    Describes a constant, immutable, or a storage variable.
 
     .. rubric:: options
 
-    .. rst:directive:option:: type: type of the constant
+    .. rst:directive:option:: type: type of the variable
         :type: text
 
-    .. rst:directive:option:: value: value of the constant
+    .. rst:directive:option:: value: value of the variable
         :type: text
 
     .. code-block:: rst
 
-        .. vy:constant:: SIZE
+        .. vy:variable:: SIZE
             :type: uint256
             :value: 42
 
-    This will render like this:
-
-    .. vy:constant:: SIZE
-        :type: uint256
-        :value: 64
-        :noindex:
-
-.. rst:directive:: .. vy:immutable:: name
-
-    Describes an immutable.
-
-    .. rubric:: options
-
-    .. rst:directive:option:: type: type of the immutable
-        :type: text
-
-    .. code-block:: rst
-
-        .. vy:immutable:: CREATION_TIME
-            :type: uint256
-
-    This will render like this:
-
-    .. vy:immutable:: CREATION_TIME
-        :type: uint256
-        :noindex:
-
-.. rst:directive:: .. vy:storage:: name
-
-    Describes a storage variable.
-
-    .. rubric:: options
-
-    .. rst:directive:option:: type: type of the storage variable
-        :type: text
-
-    .. code-block:: rst
-
-        .. vy:storage:: point
+        .. vy:variable:: point
             :type: Point
 
+
     This will render like this:
 
-    .. vy:storage:: point
+    .. vy:variable:: SIZE
+        :type: uint256
+        :value: 42
+        :noindex:
+
+    .. vy:variable:: point
         :type: Point
         :noindex:
 
@@ -195,14 +163,6 @@ matching identifier is found:
 
     Reference a struct.
 
-.. rst:role:: vy:constant
+.. rst:role:: vy:var
 
-    Reference a constant.
-
-.. rst:role:: vy:immutable
-
-    Reference an immutable.
-
-.. rst:role:: vy:storage
-
-    Reference a storage variable.
+    Reference a variable.

@@ -39,9 +39,7 @@ class VyperDomain(Domain):
         "event": ObjType(_("event"), "event"),
         "enum": ObjType(_("enum"), "enum"),
         "struct": ObjType(_("struct"), "struct"),
-        "constant": ObjType(_("constant"), "const"),
-        "immutable": ObjType(_("immutable"), "immutable"),
-        "storage": ObjType(_("storage variable"), "storage"),
+        "variable": ObjType(_("variable"), "var"),
     }
     directives = {
         "contract": VyContract,
@@ -49,18 +47,14 @@ class VyperDomain(Domain):
         "event": VyEvent,
         "enum": VyEnum,
         "struct": VyStruct,
-        "constant": VyVariable,
-        "immutable": VyVariable,
-        "storage": VyVariable,
+        "variable": VyVariable,
     }
     roles = {
         "contract": XRefRole(),
         "event": XRefRole(),
         "enum": XRefRole(),
         "struct": XRefRole(),
-        "const": XRefRole(),
-        "immutable": XRefRole(),
-        "storage": XRefRole(),
+        "var": XRefRole(),
     }
     initial_data: Dict[str, Dict[str, ObjectEntry]] = {"objects": {}}
     indices = [VyperContractIndex]
