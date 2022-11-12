@@ -7,7 +7,7 @@ from sphinx import addnodes
 from sphinx.directives import ObjectDescription
 from sphinx.locale import _, __
 from sphinx.util import logging
-from sphinx.util.docfields import GroupedField, TypedField
+from sphinx.util.docfields import Field, GroupedField, TypedField
 from sphinx.util.docutils import SphinxDirective, switch_source_input
 from sphinx.util.nodes import make_id, nested_parse_with_titles
 
@@ -199,6 +199,34 @@ class VyVariable(VySimpleObjectBase):
 
 class VyFunction(VySimpleObjectBase):
     """Directive marking the description of a function."""
+
+    doc_field_types = [
+        TypedField(
+            "parameters",
+            names=("param", "parameter", "arg", "argument"),
+            typenames=("paramtype", "type"),
+            label=_("Parameters"),
+            can_collapse=True,
+        ),
+        GroupedField(
+            "exceptions",
+            names=("revert", "reverts", "raises", "except", "exception"),
+            label=_("Reverts"),
+            can_collapse=True,
+        ),
+        Field(
+            "returnvalue",
+            names=("returns", "return", "retval"),
+            label=_("Returns"),
+            has_arg=False,
+        ),
+        Field(
+            "returntype",
+            names=("rtype", "returntype"),
+            label=_("Return type"),
+            has_arg=False,
+        ),
+    ]
 
     def handle_signature(self, sig: str, signode: addnodes.desc_signature) -> str:
         mo = re.fullmatch(r"(\w+)\((.*)\)(?:\s*->\s*(.*))?", sig)
