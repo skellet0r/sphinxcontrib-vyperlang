@@ -141,6 +141,25 @@ The Vyper domain (name **vy**) provides the following directives:
         :type: Point
         :noindex:
 
+.. rst:directive:: .. vy:function:: name
+
+    Describes a function.
+
+    .. code-block:: rst
+
+        .. vy:function:: main(_x: uint256) -> uint8
+
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+            tempor incididunt ut labore et dolore magna aliqua.
+
+    This will render like this:
+
+    .. vy:function:: main(_x: uint256) -> uint8
+        :noindex:
+
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+        tempor incididunt ut labore et dolore magna aliqua.
+
 Roles
 -----
 
