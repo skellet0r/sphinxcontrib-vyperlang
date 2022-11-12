@@ -187,3 +187,15 @@ matching identifier is found:
 .. rst:role:: vy:struct
 
     Reference a struct.
+
+.. rst:role:: vy:constant
+
+    Reference a constant.
+
+.. rst:role:: vy:immutable
+
+    Reference an immutable.
+
+.. rst:role:: vy:storage
+
+    Reference a storage variable.
