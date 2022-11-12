@@ -30,6 +30,7 @@ Table of Contents
 .. toctree::
    :maxdepth: 2
 
+   configuration
    domain
 
 Indices and tables
