@@ -1,9 +1,6 @@
 The Vyper Domain
 ================
 
-.. vy:contract:: null
-    :noindex:
-
 Directives
 ----------
 
