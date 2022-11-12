@@ -128,6 +128,44 @@ The Vyper domain (name **vy**) provides the following directives:
         :type: uint256
         :value: 64
 
+.. rst:directive:: .. vy:immutable:: name
+
+    Describes an immutable.
+
+    .. rubric:: options
+
+    .. rst:directive:option:: type: type of the immutable
+        :type: text
+
+    .. code-block:: rst
+
+        .. vy:immutable:: CREATION_TIME
+            :type: uint256
+
+    This will render like this:
+
+    .. vy:immutable:: CREATION_TIME
+        :type: uint256
+
+.. rst:directive:: .. vy:storage:: name
+
+    Describes a storage variable.
+
+    .. rubric:: options
+
+    .. rst:directive:option:: type: type of the storage variable
+        :type: text
+
+    .. code-block:: rst
+
+        .. vy:storage:: point
+            :type: Point
+
+    This will render like this:
+
+    .. vy:storage:: point
+        :type: Point
+
 Roles
 -----
 
