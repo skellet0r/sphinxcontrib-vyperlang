@@ -11,6 +11,7 @@ from sphinx.util import logging
 from sphinx.util.nodes import make_refnode
 
 from sphinxcontrib.vyperlang.domain.directives import (
+    VyConstant,
     VyContract,
     VyCurrentContract,
     VyEnum,
@@ -38,6 +39,7 @@ class VyperDomain(Domain):
         "event": ObjType(_("event"), "event"),
         "enum": ObjType(_("enum"), "enum"),
         "struct": ObjType(_("struct"), "struct"),
+        "constant": ObjType(_("constant"), "const"),
     }
     directives = {
         "contract": VyContract,
@@ -45,12 +47,14 @@ class VyperDomain(Domain):
         "event": VyEvent,
         "enum": VyEnum,
         "struct": VyStruct,
+        "constant": VyConstant,
     }
     roles = {
         "contract": XRefRole(),
         "event": XRefRole(),
         "enum": XRefRole(),
         "struct": XRefRole(),
+        "const": XRefRole(),
     }
     initial_data: Dict[str, Dict[str, ObjectEntry]] = {"objects": {}}
     indices = [VyperContractIndex]

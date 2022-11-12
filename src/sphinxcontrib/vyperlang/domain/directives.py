@@ -161,3 +161,32 @@ class VyStruct(VySimpleObjectBase):
             can_collapse=True,
         )
     ]
+
+
+class VyConstant(VySimpleObjectBase):
+    """Directive marking the description of a constant."""
+
+    option_spec = {
+        "type": directives.unchanged_required,
+        "value": directives.unchanged_required,
+        **VySimpleObjectBase.option_spec,
+    }
+
+    def handle_signature(self, sig: str, signode: addnodes.desc_signature) -> str:
+        fullname = super().handle_signature(sig, signode)
+        signode += addnodes.desc_annotation(
+            self.options["type"],
+            "",
+            addnodes.desc_sig_punctuation("", ":"),
+            addnodes.desc_sig_space(),
+            nodes.Text(self.options["type"]),
+        )
+        signode += addnodes.desc_annotation(
+            self.options["value"],
+            "",
+            addnodes.desc_sig_space(),
+            addnodes.desc_sig_punctuation("", "="),
+            addnodes.desc_sig_space(),
+            nodes.Text(self.options["value"]),
+        )
+        return fullname
