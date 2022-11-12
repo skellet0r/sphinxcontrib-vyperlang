@@ -10,7 +10,7 @@ Quickstart
 
    .. code-block:: shell
 
-      $ pip install git+https://github.com/skellet0r/sphinxcontrib-vyperlang#egg=sphinxcontrib
+      $ pip install git+https://github.com/skellet0r/sphinxcontrib-vyperlang#egg=sphinxcontrib-vyperlang
 
 #. Add ``sphinxcontrib.vyperlang`` to your extensions list in the Sphinx *conf.py* file:
 
