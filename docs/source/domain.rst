@@ -187,6 +187,13 @@ Roles
 The following roles are provided for cross-referencing objects and are hyperlinked if a
 matching identifier is found:
 
+.. note::
+
+    For roles other than :rst:role:`vy:contract`, the target is specified as ``contract.name``,
+    for example::
+
+        ... :vy:func:`ERC20.transfer` emits the :vy:event:`ERC20.Transfer` event.
+
 .. rst:role:: vy:contract
 
     Reference a contract.
@@ -206,6 +213,10 @@ matching identifier is found:
 .. rst:role:: vy:var
 
     Reference a variable.
+
+.. rst:role:: vy:func
+
+    Reference a function.
 
 Indices
 -------
