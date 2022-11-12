@@ -163,30 +163,35 @@ class VyStruct(VySimpleObjectBase):
     ]
 
 
-class VyConstant(VySimpleObjectBase):
-    """Directive marking the description of a constant."""
+class VyVariable(VySimpleObjectBase):
+    """Directive marking the description of a constant, immutable, or storage var."""
 
     option_spec = {
-        "type": directives.unchanged_required,
-        "value": directives.unchanged_required,
+        "type": directives.unchanged,
+        "value": directives.unchanged,
         **VySimpleObjectBase.option_spec,
     }
 
     def handle_signature(self, sig: str, signode: addnodes.desc_signature) -> str:
         fullname = super().handle_signature(sig, signode)
-        signode += addnodes.desc_annotation(
-            self.options["type"],
-            "",
-            addnodes.desc_sig_punctuation("", ":"),
-            addnodes.desc_sig_space(),
-            nodes.Text(self.options["type"]),
-        )
-        signode += addnodes.desc_annotation(
-            self.options["value"],
-            "",
-            addnodes.desc_sig_space(),
-            addnodes.desc_sig_punctuation("", "="),
-            addnodes.desc_sig_space(),
-            nodes.Text(self.options["value"]),
-        )
+
+        if typ := self.options.get("type"):
+            signode += addnodes.desc_annotation(
+                typ,
+                "",
+                addnodes.desc_sig_punctuation("", ":"),
+                addnodes.desc_sig_space(),
+                nodes.Text(typ),
+            )
+
+        if value := self.options.get("value"):
+            signode += addnodes.desc_annotation(
+                value,
+                "",
+                addnodes.desc_sig_space(),
+                addnodes.desc_sig_punctuation("", "="),
+                addnodes.desc_sig_space(),
+                nodes.Text(value),
+            )
+
         return fullname

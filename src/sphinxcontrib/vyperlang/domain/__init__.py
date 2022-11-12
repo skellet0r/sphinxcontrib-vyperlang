@@ -11,12 +11,12 @@ from sphinx.util import logging
 from sphinx.util.nodes import make_refnode
 
 from sphinxcontrib.vyperlang.domain.directives import (
-    VyConstant,
     VyContract,
     VyCurrentContract,
     VyEnum,
     VyEvent,
     VyStruct,
+    VyVariable,
 )
 from sphinxcontrib.vyperlang.domain.indices import VyperContractIndex
 
@@ -47,7 +47,7 @@ class VyperDomain(Domain):
         "event": VyEvent,
         "enum": VyEnum,
         "struct": VyStruct,
-        "constant": VyConstant,
+        "constant": VyVariable,
     }
     roles = {
         "contract": XRefRole(),
