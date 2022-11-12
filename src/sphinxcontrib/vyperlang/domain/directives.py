@@ -13,7 +13,7 @@ from sphinx.util.nodes import make_id, nested_parse_with_titles
 
 logger = logging.getLogger(__name__)
 
-SIMPLE_SIG = re.compile(r"\w+")
+SIMPLE_SIG = re.compile(r"[\w.]+")
 
 
 class VyContract(SphinxDirective):
@@ -78,7 +78,7 @@ class VySimpleObjectBase(ObjectDescription):
             logger.warning(
                 __(f"{self.objtype} encountered outside of a contract: {sig!r}")
             )
-            raise ValueError
+            cname = "builtins"
 
         signode["contract"] = cname
         signode["fullname"] = fullname = f"{cname}.{sig}"
@@ -239,7 +239,7 @@ class VyFunction(VySimpleObjectBase):
             logger.warning(
                 __(f"{self.objtype} encountered outside of a contract: {sig!r}")
             )
-            raise ValueError
+            cname = "builtins"
 
         name, params, retann = mo.groups(default="")
         signode["contract"] = cname
