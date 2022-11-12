@@ -145,20 +145,41 @@ The Vyper domain (name **vy**) provides the following directives:
 
     Describes a function.
 
+    .. rubric:: Info Fields
+
+    * ``param``, ``parameter``, ``arg``, ``argument``: Description of a parameter.
+    * ``paramtype``, ``type``: Type of a parameter.
+    * ``revert``, ``reverts``, ``raises``, ``except``, ``exception``: Description of a
+        revert case.
+    * ``returns``, ``return``, ``retval``: Description of the return value.
+    * ``rtype``: Return type.
+
     .. code-block:: rst
 
-        .. vy:function:: main(_x: uint256) -> uint8
+        .. vy:function:: main(_x: uint256, _y: uint32) -> uint8
 
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
             tempor incididunt ut labore et dolore magna aliqua.
 
+            :param uint256 _x: The seed value.
+            :param _y: A salt value.
+            :type _y: uint32
+            :returns: The value after computation.
+            :rtype: uint8
+
     This will render like this:
 
-    .. vy:function:: main(_x: uint256) -> uint8
+    .. vy:function:: main(_x: uint256, _y: uint32) -> uint8
         :noindex:
 
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
         tempor incididunt ut labore et dolore magna aliqua.
+
+        :param uint256 _x: The seed value.
+        :param _y: A salt value.
+        :type _y: uint32
+        :returns: The value after computation.
+        :rtype: uint8
 
 Roles
 -----
