@@ -206,3 +206,12 @@ matching identifier is found:
 .. rst:role:: vy:var
 
     Reference a variable.
+
+Indices
+-------
+
+The *Vyper Contract Index* is available by linking to ``vy-contractindex``, like so:
+
+.. code-block:: rst
+
+    :ref:`vy-contractindex`
