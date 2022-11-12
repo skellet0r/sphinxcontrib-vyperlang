@@ -1,6 +1,8 @@
 The Vyper Domain
 ================
 
+.. vy:contract:: null
+
 Directives
 ----------
 
@@ -101,6 +103,30 @@ The Vyper domain (name **vy**) provides the following directives:
         :member int256 x: The x-coordinate.
         :member y: The y-coordinate.
         :membertype y: int256
+
+.. rst:directive:: .. vy:constant:: name
+
+    Describes a constant.
+
+    .. rubric:: options
+
+    .. rst:directive:option:: type: type of the constant
+        :type: text
+
+    .. rst:directive:option:: value: value of the constant
+        :type: text
+
+    .. code-block:: rst
+
+        .. vy:constant:: SIZE
+            :type: uint256
+            :value: 42
+
+    This will render like this:
+
+    .. vy:constant:: SIZE
+        :type: uint256
+        :value: 64
 
 Roles
 -----
