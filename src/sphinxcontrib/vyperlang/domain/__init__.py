@@ -15,6 +15,7 @@ from sphinxcontrib.vyperlang.domain.directives import (
     VyCurrentContract,
     VyEnum,
     VyEvent,
+    VyFunction,
     VyStruct,
     VyVariable,
 )
@@ -40,6 +41,7 @@ class VyperDomain(Domain):
         "enum": ObjType(_("enum"), "enum"),
         "struct": ObjType(_("struct"), "struct"),
         "variable": ObjType(_("variable"), "var"),
+        "function": ObjType(_("function"), "func"),
     }
     directives = {
         "contract": VyContract,
@@ -48,6 +50,7 @@ class VyperDomain(Domain):
         "enum": VyEnum,
         "struct": VyStruct,
         "variable": VyVariable,
+        "function": VyFunction,
     }
     roles = {
         "contract": XRefRole(),
@@ -55,6 +58,7 @@ class VyperDomain(Domain):
         "enum": XRefRole(),
         "struct": XRefRole(),
         "var": XRefRole(),
+        "func": XRefRole(),
     }
     initial_data: Dict[str, Dict[str, ObjectEntry]] = {"objects": {}}
     indices = [VyperContractIndex]

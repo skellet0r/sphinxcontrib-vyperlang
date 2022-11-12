@@ -195,3 +195,41 @@ class VyVariable(VySimpleObjectBase):
             )
 
         return fullname
+
+
+class VyFunction(VySimpleObjectBase):
+    """Directive marking the description of a function."""
+
+    def handle_signature(self, sig: str, signode: addnodes.desc_signature) -> str:
+        mo = re.fullmatch(r"(\w+)\((.*)\)(?:\s*->\s*(.*))?", sig)
+        if mo is None:
+            logger.warning(__(f"invalid {self.objtype} signature: {sig!r}"))
+            raise ValueError
+
+        cname = self.env.ref_context.get("vy:contract")
+        if cname is None:
+            logger.warning(
+                __(f"{self.objtype} encountered outside of a contract: {sig!r}")
+            )
+            raise ValueError
+
+        name, params, retann = mo.groups(default="")
+        signode["contract"] = cname
+        signode["fullname"] = fullname = f"{cname}.{name}"
+
+        if self.env.config.vy_add_contract_names:
+            nodetext = cname + "."
+            signode += addnodes.desc_addname(nodetext, nodetext)
+
+        signode += addnodes.desc_name(name, name)
+
+        paramlist = addnodes.desc_parameterlist(params)
+        if params:
+            paramlist += addnodes.desc_parameter("", nodes.Text(params))
+        signode += paramlist
+
+        if retann:
+            signode += addnodes.desc_sig_space()
+            signode += addnodes.desc_returns(retann, "", nodes.Text(retann))
+
+        return fullname
