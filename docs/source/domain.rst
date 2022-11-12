@@ -2,6 +2,7 @@ The Vyper Domain
 ================
 
 .. vy:contract:: null
+    :noindex:
 
 Directives
 ----------
@@ -45,6 +46,7 @@ The Vyper domain (name **vy**) provides the following directives:
     This will render like this:
 
     .. vy:enum:: Roles
+        :noindex:
 
         :element Admin: An account with special privileges.
         :element Custodian: An account with privilege to call custodial functions.
@@ -73,6 +75,7 @@ The Vyper domain (name **vy**) provides the following directives:
     This will render like this:
 
     .. vy:event:: Transfer
+        :noindex:
 
         :topic address sender: The account tokens originated from.
         :topic receiver: The account tokens were credited to.
@@ -99,6 +102,7 @@ The Vyper domain (name **vy**) provides the following directives:
     This will render like this:
 
     .. vy:struct:: Point
+        :noindex:
 
         :member int256 x: The x-coordinate.
         :member y: The y-coordinate.
@@ -127,6 +131,7 @@ The Vyper domain (name **vy**) provides the following directives:
     .. vy:constant:: SIZE
         :type: uint256
         :value: 64
+        :noindex:
 
 .. rst:directive:: .. vy:immutable:: name
 
@@ -146,6 +151,7 @@ The Vyper domain (name **vy**) provides the following directives:
 
     .. vy:immutable:: CREATION_TIME
         :type: uint256
+        :noindex:
 
 .. rst:directive:: .. vy:storage:: name
 
@@ -165,6 +171,7 @@ The Vyper domain (name **vy**) provides the following directives:
 
     .. vy:storage:: point
         :type: Point
+        :noindex:
 
 Roles
 -----
