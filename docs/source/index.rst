@@ -1,7 +1,7 @@
 Sphinx Vyperlang Extension
 ==========================
 
-Documentation for the ``sphinxcontract.vyperlang`` extension.
+Documentation for the ``sphinxcontrib.vyperlang`` extension.
 
 Quickstart
 ----------
